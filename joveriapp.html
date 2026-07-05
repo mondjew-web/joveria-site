@@ -3,7 +3,7 @@
 <html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JOVERIA — On creuse, vous économisez</title>
+<title>JOVERIAPP' — La bibliothèque d'applications JOVERIA</title>
 <meta name="description" content="JOVERIA aide les auto-entrepreneurs, artisans, TPE et entreprises du BTP et de l&#39;industrie à trouver les économies cachées dans leur organisation. Diagnostic gratuit en 10 minutes, sans jargon de consultant.">
 <style>
 @font-face {
@@ -483,11 +483,103 @@ footer { background: var(--noir); color: var(--text-onDark-soft); padding: 48px 
 }
 .footer-logo { display: flex; align-items: center; gap: 10px; font-family: 'Avenir Next', 'Century Gothic', -apple-system, 'Helvetica Neue', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold); }
 footer .fine { font-size: 13px; }
+
+/* ---------- JOVERIAPP : catalogue & panier ---------- */
+.apphero { padding: 64px 0 40px; }
+.apphero h1 { font-size: 44px; margin: 16px 0; }
+.apphero .lead { font-size: 17px; color: var(--text-onDark-soft); max-width: 640px; margin: 0; }
+@media (max-width: 640px) { .apphero h1 { font-size: 32px; } }
+
+.catalogue-section { padding: 20px 0 80px; }
+.catalogue-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 40px;
+  align-items: start;
+}
+@media (max-width: 900px) { .catalogue-layout { grid-template-columns: 1fr; } }
+
+.apps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+@media (max-width: 640px) { .apps-grid { grid-template-columns: 1fr; } }
+
+.app-card {
+  background: var(--noir-2);
+  border: 2px solid var(--white-line);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.app-card.selected { border-color: var(--gold); }
+
+.app-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.app-card h3 { font-size: 19px; }
+.app-price { font-family: 'Fraunces', serif; font-weight: 700; color: var(--gold); font-size: 18px; white-space: nowrap; }
+.app-price-unit { font-size: 12px; font-weight: 400; color: var(--text-onDark-soft); }
+
+.app-card p { font-size: 14px; margin: 0 0 18px; }
+
+.app-btn {
+  width: 100%;
+  background: var(--noir);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.app-btn:hover { background: var(--gold); color: var(--noir); }
+.app-card.selected .app-btn { background: var(--gold); color: var(--noir); }
+
+.cart-panel {
+  background: var(--noir-2);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  position: sticky;
+  top: 90px;
+}
+.cart-panel h3 { font-size: 18px; margin-bottom: 16px; }
+.cart-empty { font-size: 13.5px; color: var(--text-onDark-soft); margin-bottom: 16px; }
+.cart-list { list-style: none; margin: 0 0 16px; padding: 0; }
+.cart-list li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--white-line);
+}
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 0;
+  border-top: 2px solid var(--gold);
+  margin-bottom: 16px;
+}
+.cart-total-row strong { font-family: 'Fraunces', serif; color: var(--gold); font-size: 20px; }
+.cart-checkout-btn { width: 100%; justify-content: center; }
+.cart-checkout-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.cart-note { font-size: 11.5px; color: var(--text-onDark-soft); margin: 12px 0 0; text-align: center; }
 </style>
 </head>
 <body>
 <div class="site-bg"></div>
-
 <header>
   <div class="wrap header-inner">
     <div class="logo">
@@ -500,126 +592,135 @@ footer .fine { font-size: 13px; }
       <span class="logo-text">joveria</span>
     </div>
     <nav>
-      <a href="#methode" class="navlink">La méthode</a>
-      <a href="#axes" class="navlink">Les 4 axes</a>
-      <a href="joveriapp.html" class="navlink">JOVERIAPP'</a>
-      <a href="#audit" class="btn-nav">Faire le diagnostic</a>
+      <a href="index.html" class="navlink">Accueil</a>
+      <a href="index.html#methode" class="navlink">La méthode</a>
+      <a href="#catalogue" class="navlink">Catalogue</a>
+      <a href="index.html#audit" class="btn-nav">Faire le diagnostic</a>
     </nav>
   </div>
 </header>
 
-<section class="hero">
+<section class="apphero">
   <div class="wrap">
-    <div class="hero-content">
-      <div class="eyebrow">Conseil pour artisans, TPE et BTP</div>
-      <h1>Votre boîte perd de l'argent.<br>On a la <span class="hl">pelle</span> pour creuser.</h1>
-      <p class="lead">JOVERIA repère les fuites d'argent cachées dans votre organisation (paperasse, plannings, turnover) et reste pour vous aider à les boucher. Pas de jargon de consultant, juste des chiffres et un plan.</p>
-      <div class="cta-row">
-        <a href="#audit" class="btn-primary">Estimer mes économies →</a>
-        <a href="#methode" class="btn-secondary">Comment ça marche</a>
-      </div>
-      <p class="hero-caption">Fini les « tu rentres encore tard ? » — on vous rend vos soirées.</p>
-    </div>
+    <div class="eyebrow">Bibliothèque d'applications</div>
+    <h1>JOVERIAPP'</h1>
+    <p class="lead">Des mini-applications métier, pensées pour les artisans, auto-entrepreneurs et TPE. Pas d'abonnement usine à gaz : vous prenez ce dont vous avez besoin, rien de plus.</p>
   </div>
 </section>
 
-<div class="trust-strip">
-  <div class="wrap trust-row">
-    <div>4 axes passés au crible</div>
-    <div>⏱️ 10 minutes chrono</div>
-    <div>🆓 0€ pour le premier diagnostic</div>
-    <div>Pensé pour artisans, TPE et BTP</div>
-  </div>
-</div>
+<section id="catalogue" class="catalogue-section">
+  <div class="wrap catalogue-layout">
+    <div class="apps-grid">
 
-<section id="methode">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">La méthode</div>
-      <h2>On pose le diagnostic, puis on reste sur le chantier</h2>
-      <p>Beaucoup de cabinets repartent une fois le rapport livré. Nous, on enfile les bottes et on reste jusqu'à ce que les économies soient sur votre compte, pas juste dans un PDF.</p>
-    </div>
-    <div class="timeline-track">
-      <div class="timeline-step">
-        <div class="timeline-marker">1</div>
-        <h3>Diagnostic gratuit</h3>
-        <p>10 minutes de questions sur votre organisation, et une première estimation chiffrée de ce que vous pourriez économiser chaque année.</p>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-marker">2</div>
-        <h3>Audit complet</h3>
-        <p>On creuse les 4 axes en détail et on revient avec un plan d'action concret, chiffré et priorisé.</p>
-      </div>
-      <div class="timeline-step">
-        <div class="timeline-marker">3</div>
-        <h3>Mise en œuvre</h3>
-        <p>On reste à vos côtés pour appliquer le plan, jusqu'au résultat mesurable sur votre trésorerie.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="quote-band">
-  <div class="wrap"><p>On connaît le terrain — pas juste les tableurs.</p></div>
-</div>
-
-<section id="axes">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Le périmètre</div>
-      <h2>4 axes, une seule question : où part votre marge ?</h2>
-    </div>
-    <div class="axes-grid">
-      <div class="axe-card">
-        <div class="axe-num">Axe 01</div>
-        <h3>Digital &amp; outils</h3>
-        <p>Devis, factures, plannings, suivi d'heures : ce qui se fait encore à la main coûte plus cher qu'on ne le pense.</p>
-      </div>
-      <div class="axe-card">
-        <div class="axe-num">Axe 02</div>
-        <h3>Organisation</h3>
-        <p>Retards chantier, process informels, charge administrative mal répartie entre vous et vos équipes.</p>
-      </div>
-      <div class="axe-card">
-        <div class="axe-num">Axe 03</div>
-        <h3>Commercial</h3>
-        <p>Taux de conversion des devis, relances, présence en ligne : la croissance qui dort dans vos process actuels.</p>
-      </div>
-      <div class="axe-card">
-        <div class="axe-num">Axe 04</div>
-        <h3>Ressources humaines</h3>
-        <p>Turnover, recrutement, fidélisation des équipes terrain : le vrai coût de voir partir ses meilleurs gars.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="audit" class="audit-section">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Diagnostic gratuit</div>
-      <h2>Combien vous pourriez économiser ?</h2>
-      <p>17 questions, 10 minutes, une fourchette chiffrée à la fin, basée sur de vraies données sectorielles artisanat, TPE et BTP.</p>
-    </div>
-
-    <div class="audit-panel">
-      <div id="progress-wrap">
-        <div class="progress-row">
-          <span id="step-label">Vos coordonnées</span>
-          <span id="step-count">Étape 1 / 7</span>
+      <div class="app-card" data-id="devispeintre" data-name="Devispeintre" data-price="19">
+        <div class="app-card-top">
+          <h3>Devispeintre</h3>
+          <span class="app-price">19€<span class="app-price-unit">/mois</span></span>
         </div>
-        <div class="progress-track"><div id="progress-bar" style="width: 14.2857%;"></div></div>
+        <p>Devis et métrés pour peintres en bâtiment : mesure des pièces, options boiseries, génération de devis PDF personnalisé aux couleurs de votre entreprise.</p>
+        <button class="app-btn" type="button">Ajouter</button>
       </div>
 
-      <div id="screens"><div class="q-block"><p class="q-text">Avant votre estimation, dites-nous qui vous êtes (vos données restent strictement confidentielles).</p><div class="lead-form-row"><div class="field"><label>Nom et prénom</label><input type="text" id="lead-nom" value="" placeholder="Jean Dupont"></div><div class="field"><label>Entreprise</label><input type="text" id="lead-entreprise" value="" placeholder="Nom de votre entreprise"></div></div><div class="lead-form-row"><div class="field"><label>Email</label><input type="email" id="lead-email" value="" placeholder="jean@entreprise.fr"></div><div class="field"><label>Téléphone</label><input type="tel" id="lead-tel" value="" placeholder="06 12 34 56 78"></div></div><div class="field-error" id="lead-error">Il nous faut au moins votre nom, et un email ou un téléphone, pour vous envoyer votre estimation.</div></div></div>
-
-      <div class="audit-nav">
-        <button id="btn-back" class="btn-flat" type="button" style="visibility:hidden;">← Précédent</button>
-        <button id="btn-next" class="btn-flat primary" type="button" style="visibility: visible;">Suivant →</button>
+      <div class="app-card" data-id="suivi-chantier" data-name="Suivi de chantier" data-price="15">
+        <div class="app-card-top">
+          <h3>Suivi de chantier</h3>
+          <span class="app-price">15€<span class="app-price-unit">/mois</span></span>
+        </div>
+        <p>Pointage des heures par chantier, photos d'avancement horodatées, export simple pour la facturation. <em>(exemple à personnaliser)</em></p>
+        <button class="app-btn" type="button">Ajouter</button>
       </div>
+
+      <div class="app-card" data-id="devis-btp" data-name="Gestion des devis BTP" data-price="19">
+        <div class="app-card-top">
+          <h3>Gestion des devis BTP</h3>
+          <span class="app-price">19€<span class="app-price-unit">/mois</span></span>
+        </div>
+        <p>Créez, envoyez et relancez vos devis chantier depuis votre téléphone. Suivi des statuts (envoyé, accepté, facturé). <em>(exemple à personnaliser)</em></p>
+        <button class="app-btn" type="button">Ajouter</button>
+      </div>
+
+      <div class="app-card" data-id="planning-equipes" data-name="Planning équipes" data-price="12">
+        <div class="app-card-top">
+          <h3>Planning équipes</h3>
+          <span class="app-price">12€<span class="app-price-unit">/mois</span></span>
+        </div>
+        <p>Organisez les équipes par chantier ou par mission, partagez le planning en un clic. <em>(exemple à personnaliser)</em></p>
+        <button class="app-btn" type="button">Ajouter</button>
+      </div>
+
     </div>
+
+    <aside class="cart-panel">
+      <h3>Votre sélection</h3>
+      <div id="cart-empty" class="cart-empty">Aucune application sélectionnée pour le moment.</div>
+      <ul id="cart-list" class="cart-list"></ul>
+      <div class="cart-total-row">
+        <span>Total mensuel</span>
+        <strong id="cart-total">0€</strong>
+      </div>
+      <button id="cart-checkout" class="btn-primary cart-checkout-btn" type="button" disabled>Procéder au paiement</button>
+      <p class="cart-note">Paiement sécurisé — sans engagement, résiliable à tout moment.</p>
+    </aside>
   </div>
 </section>
+
+<script>
+(function(){
+  var selected = {};
+
+  var cards = document.querySelectorAll('.app-card');
+  var cartList = document.getElementById('cart-list');
+  var cartEmpty = document.getElementById('cart-empty');
+  var cartTotal = document.getElementById('cart-total');
+  var checkoutBtn = document.getElementById('cart-checkout');
+
+  function render() {
+    var ids = Object.keys(selected);
+    cartList.innerHTML = '';
+    if (ids.length === 0) {
+      cartEmpty.style.display = 'block';
+      checkoutBtn.disabled = true;
+    } else {
+      cartEmpty.style.display = 'none';
+      checkoutBtn.disabled = false;
+      ids.forEach(function(id){
+        var item = selected[id];
+        var li = document.createElement('li');
+        li.innerHTML = '<span>' + item.name + '</span><span>' + item.price + '€/mois</span>';
+        cartList.appendChild(li);
+      });
+    }
+    var total = ids.reduce(function(sum, id){ return sum + selected[id].price; }, 0);
+    cartTotal.textContent = total + '€';
+  }
+
+  cards.forEach(function(card){
+    var btn = card.querySelector('.app-btn');
+    var id = card.getAttribute('data-id');
+    var name = card.getAttribute('data-name');
+    var price = parseFloat(card.getAttribute('data-price'));
+
+    btn.addEventListener('click', function(){
+      if (selected[id]) {
+        delete selected[id];
+        btn.textContent = 'Ajouter';
+        card.classList.remove('selected');
+      } else {
+        selected[id] = { name: name, price: price };
+        btn.textContent = 'Retirer';
+        card.classList.add('selected');
+      }
+      render();
+    });
+  });
+
+  checkoutBtn.addEventListener('click', function(){
+    alert('Le paiement en ligne arrive bientôt ! En attendant, contactez-nous directement pour souscrire aux applications sélectionnées.');
+  });
+
+  render();
+})();
+</script>
 
 <footer>
   <div class="wrap">
@@ -638,252 +739,5 @@ footer .fine { font-size: 13px; }
     <div class="fine">© 2026 JOVERIA. Diagnostic indicatif, affiné lors de l'audit complet.</div>
   </div>
 </footer>
-
-<script>
-(function(){
-
-var sections = [
-  { label: "Vos coordonnées", isLead: true },
-  {
-    label: "Profil de l'entreprise",
-    questions: [
-      {id:"q0_1", text:"Combien de salariés compte votre entreprise ?", options:["0 à 5","5 à 10","Plus de 10"]},
-      {id:"q0_2", text:"Quel est votre secteur précis ?", options:["Gros œuvre","Second œuvre","Travaux publics","Industrie / production","Autre"]},
-      {id:"q0_3", text:"Quelle est l'ancienneté de votre entreprise ?", options:["Moins de 2 ans","2 à 10 ans","Plus de 10 ans"]}
-    ]
-  },
-  {
-    label: "Digital et outils",
-    questions: [
-      {id:"q1_1", text:"Comment gérez-vous vos devis et factures ?", options:["Papier ou Word manuel","Excel","Logiciel dédié","Mon comptable gère"]},
-      {id:"q1_2", text:"Comment suivez-vous les heures travaillées par vos équipes ?", options:["Pointage papier","Déclaratif oral ou SMS","Application de pointage","Pas de suivi formalisé"]},
-      {id:"q1_3", text:"Comment planifiez-vous les chantiers et l'affectation des équipes ?", options:["Tableau papier ou Excel","Planning numérique partagé","Au feeling / téléphone","Logiciel dédié"]},
-      {id:"q1_4", text:"Quel outil utilisez-vous pour communiquer avec le terrain ?", options:["Appels téléphoniques","SMS ou WhatsApp","Application métier dédiée","Instructions orales sur site"]},
-      {id:"q1_5", text:"Combien de temps passez-vous chaque semaine en saisie administrative manuelle ?", options:["Moins de 5h","5 à 10h","10 à 15h","Plus de 15h"]}
-    ]
-  },
-  {
-    label: "Organisation et process",
-    questions: [
-      {id:"q2_1", text:"À quelle fréquence rencontrez-vous des retards sur vos chantiers ?", options:["Jamais ou rarement","Occasionnellement","Souvent","Très souvent"]},
-      {id:"q2_2", text:"Comment les incidents terrain sont-ils remontés ?", options:["Pas de process formel","Appel téléphonique","Message écrit","Outil de signalement dédié"]},
-      {id:"q2_3", text:"Qui passe le plus de temps sur l'administratif chez vous ?", options:["Le dirigeant lui-même","Un chef de chantier / encadrant","Un administratif dédié","Réparti entre plusieurs personnes"]},
-      {id:"q2_4", text:"Avez-vous des process écrits (sécurité, qualité, onboarding) ?", options:["Aucun","Quelques documents non suivis","Process écrits et appliqués","Process écrits et mis à jour"]},
-      {id:"q2_5", text:"Comment gérez-vous le suivi des stocks et du matériel ?", options:["Pas de suivi","À l'œil / papier","Tableau Excel","Logiciel dédié"]}
-    ]
-  },
-  {
-    label: "Commercial",
-    questions: [
-      {id:"q3_1", text:"Comment trouvez-vous l'essentiel de vos nouveaux clients ?", options:["Bouche-à-oreille","Réseau professionnel (Capeb...)","Appels d'offres","Site web / réseaux sociaux"]},
-      {id:"q3_2", text:"Quel est votre taux de conversion devis envoyés / signés ?", options:["Moins de 20%","20 à 40%","40 à 60%","Plus de 60%","Je ne sais pas"]},
-      {id:"q3_3", text:"Comment relancez-vous les devis sans réponse ?", options:["Pas de relance systématique","Relance téléphonique manuelle","Relance par mail manuelle","Relance automatisée"]},
-      {id:"q3_4", text:"Quelle est votre présence en ligne actuelle ?", options:["Aucune","Réseau social seulement","Site web basique","Site optimisé avec avis clients"]}
-    ]
-  },
-  {
-    label: "Ressources humaines",
-    questions: [
-      {id:"q4_1", text:"Quel est votre turnover annuel estimé ?", options:["Moins de 10%","10 à 20%","20 à 30%","Plus de 30%"]},
-      {id:"q4_2", text:"Comment recrutez-vous principalement ?", options:["Bouche-à-oreille / réseau","Annonces","Cabinet / intérim","Cooptation interne"]},
-      {id:"q4_3", text:"Quelle difficulté avez-vous à fidéliser vos équipes terrain ?", options:["Aucune difficulté","Difficulté légère","Difficulté notable","Difficulté majeure"]},
-      {id:"q4_4", text:"Organisez-vous des entretiens réguliers avec vos équipes ?", options:["Jamais","Seulement en cas de problème","Annuellement","Régulièrement"]}
-    ]
-  },
-  { label: "Vos résultats", isResults: true }
-];
-
-var answers = {};
-var lead = {};
-var current = 0;
-var screensEl = document.getElementById('screens');
-var progressBar = document.getElementById('progress-bar');
-var stepLabel = document.getElementById('step-label');
-var stepCount = document.getElementById('step-count');
-var btnBack = document.getElementById('btn-back');
-var btnNext = document.getElementById('btn-next');
-
-function buildLeadScreen(){
-  var html = '<div class="q-block">';
-  html += '<p class="q-text">Avant votre estimation, dites-nous qui vous êtes (vos données restent strictement confidentielles).</p>';
-  html += '<div class="lead-form-row">';
-  html += '<div class="field"><label>Nom et prénom</label><input type="text" id="lead-nom" value="' + (lead.nom||'') + '" placeholder="Jean Dupont"></div>';
-  html += '<div class="field"><label>Entreprise</label><input type="text" id="lead-entreprise" value="' + (lead.entreprise||'') + '" placeholder="Nom de votre entreprise"></div>';
-  html += '</div>';
-  html += '<div class="lead-form-row">';
-  html += '<div class="field"><label>Email</label><input type="email" id="lead-email" value="' + (lead.email||'') + '" placeholder="jean@entreprise.fr"></div>';
-  html += '<div class="field"><label>Téléphone</label><input type="tel" id="lead-tel" value="' + (lead.tel||'') + '" placeholder="06 12 34 56 78"></div>';
-  html += '</div>';
-  html += '<div class="field-error" id="lead-error">Il nous faut au moins votre nom, et un email ou un téléphone, pour vous envoyer votre estimation.</div>';
-  html += '</div>';
-  return html;
-}
-
-function renderScreen(idx){
-  var sec = sections[idx];
-  stepLabel.textContent = sec.label;
-  stepCount.textContent = "Étape " + (idx+1) + " / " + sections.length;
-  progressBar.style.width = ((idx+1)/sections.length*100) + "%";
-
-  if(sec.isResults){
-    screensEl.innerHTML = buildResults();
-    btnNext.style.visibility = "hidden";
-    btnBack.style.visibility = "visible";
-    return;
-  }
-
-  btnNext.style.visibility = "visible";
-  btnNext.textContent = (idx === sections.length - 2) ? "Voir mes résultats →" : "Suivant →";
-  btnBack.style.visibility = idx === 0 ? "hidden" : "visible";
-
-  if(sec.isLead){
-    screensEl.innerHTML = buildLeadScreen();
-    return;
-  }
-
-  var html = "";
-  sec.questions.forEach(function(q){
-    html += '<div class="q-block">';
-    html += '<p class="q-text">' + q.text + '</p>';
-    html += '<div class="opt-row" data-qid="' + q.id + '">';
-    q.options.forEach(function(opt){
-      var selected = answers[q.id] === opt;
-      html += '<button type="button" class="opt-btn' + (selected?' selected':'') + '" data-qid="' + q.id + '" data-val="' + opt.replace(/"/g,'&quot;') + '">' + opt + '</button>';
-    });
-    html += '</div></div>';
-  });
-  screensEl.innerHTML = html;
-
-  Array.prototype.forEach.call(screensEl.querySelectorAll('.opt-btn'), function(btn){
-    btn.addEventListener('click', function(){
-      var qid = btn.getAttribute('data-qid');
-      var val = btn.getAttribute('data-val');
-      answers[qid] = val;
-      renderScreen(current);
-    });
-  });
-}
-
-function saveLead(){
-  var nomEl = document.getElementById('lead-nom');
-  if(nomEl){
-    lead.nom = nomEl.value;
-    lead.entreprise = document.getElementById('lead-entreprise').value;
-    lead.email = document.getElementById('lead-email').value;
-    lead.tel = document.getElementById('lead-tel').value;
-  }
-}
-
-function validLead(){
-  return lead.nom && lead.nom.trim().length > 0 && ((lead.email && lead.email.includes('@')) || (lead.tel && lead.tel.trim().length >= 6));
-}
-
-function fmt(n){ return n.toLocaleString('fr-FR'); }
-
-function calc(){
-  var weeks = 47;
-  var timeMap = {"Moins de 5h":2.5, "5 à 10h":7.5, "10 à 15h":12.5, "Plus de 15h":17};
-  var rateMap = {
-    "Le dirigeant lui-même":40,
-    "Un chef de chantier / encadrant":28,
-    "Un administratif dédié":22,
-    "Réparti entre plusieurs personnes":30
-  };
-  var hoursWeek = timeMap[answers.q1_5] || 7.5;
-  var rate = rateMap[answers.q2_3] || 30;
-  var adminCostYear = hoursWeek * rate * weeks;
-  var adminSavingsLow = adminCostYear * 0.25;
-  var adminSavingsHigh = adminCostYear * 0.40;
-
-  var turnoverMap = {"Moins de 10%":0.07, "10 à 20%":0.15, "20 à 30%":0.25, "Plus de 30%":0.35};
-  var headcountMap = {"0 à 5":3, "5 à 10":7.5, "Plus de 10":15};
-  var turnoverRate = turnoverMap[answers.q4_1] || 0.15;
-  var headcount = headcountMap[answers.q0_1] || 7.5;
-  var departuresYear = turnoverRate * headcount;
-  var replacementCost = 10000;
-  var turnoverCostYear = departuresYear * replacementCost;
-  var turnoverSavingsLow = turnoverCostYear * 0.15;
-  var turnoverSavingsHigh = turnoverCostYear * 0.30;
-
-  var totalLow = Math.round(adminSavingsLow + turnoverSavingsLow);
-  var totalHigh = Math.round(adminSavingsHigh + turnoverSavingsHigh);
-
-  return {
-    adminCostYear: Math.round(adminCostYear),
-    adminSavingsLow: Math.round(adminSavingsLow),
-    adminSavingsHigh: Math.round(adminSavingsHigh),
-    turnoverSavingsLow: Math.round(turnoverSavingsLow),
-    turnoverSavingsHigh: Math.round(turnoverSavingsHigh),
-    departuresYear: Math.round(departuresYear*10)/10,
-    totalLow: totalLow,
-    totalHigh: totalHigh
-  };
-}
-
-function buildResults(){
-  var r = calc();
-  var firstName = (lead.nom || '').split(' ')[0] || '';
-  var html = '';
-  if(firstName){
-    html += '<p style="font-size:15px; color:var(--text-onDark-soft); margin-bottom:18px; font-weight:600;">Bien joué ' + firstName + ', voici ce qu\'on a trouvé.</p>';
-  }
-  html += '<div class="result-hero">';
-  html += '<div class="label">Économie potentielle estimée par an</div>';
-  html += '<div class="figure">' + fmt(r.totalLow) + ' € — ' + fmt(r.totalHigh) + ' €</div>';
-  html += '</div>';
-
-  html += '<div class="result-grid">';
-  html += '<div class="result-card"><div class="rlabel">Charge administrative</div><div class="rvalue">' + fmt(r.adminSavingsLow) + ' — ' + fmt(r.adminSavingsHigh) + ' €</div><div class="rsub">Sur un coût admin estimé à ' + fmt(r.adminCostYear) + ' €/an</div></div>';
-  html += '<div class="result-card"><div class="rlabel">Turnover</div><div class="rvalue">' + fmt(r.turnoverSavingsLow) + ' — ' + fmt(r.turnoverSavingsHigh) + ' €</div><div class="rsub">' + r.departuresYear + ' départs estimés/an</div></div>';
-  html += '</div>';
-
-  html += '<div class="disclaimer">Estimation basée sur des données sectorielles (étude Qonto/OpinionWay 2026 sur le temps administratif dans le BTP, étude Deloitte 2024 sur le coût du turnover) et sur vos réponses. Ces chiffres sont indicatifs et seront affinés lors de l\'audit complet.</div>';
-
-  html += '<button type="button" class="btn-flat primary" id="btn-restart" style="width:100%;">Recommencer le diagnostic</button>';
-
-  return html;
-}
-
-btnNext.addEventListener('click', function(){
-  var sec = sections[current];
-  if(sec.isLead){
-    saveLead();
-    if(!validLead()){
-      document.getElementById('lead-error').style.display = 'block';
-      return;
-    }
-  }
-  if(current < sections.length - 1){
-    current++;
-    renderScreen(current);
-    if(sections[current].isResults){
-      setTimeout(function(){
-        var restartBtn = document.getElementById('btn-restart');
-        if(restartBtn){
-          restartBtn.addEventListener('click', function(){
-            answers = {};
-            current = 0;
-            renderScreen(0);
-            document.getElementById('audit').scrollIntoView({behavior:'smooth'});
-          });
-        }
-      }, 0);
-    }
-  }
-});
-
-btnBack.addEventListener('click', function(){
-  if(current > 0){
-    current--;
-    renderScreen(current);
-  }
-});
-
-renderScreen(0);
-
-})();
-</script>
-
-
-
-</body></html>
+</body>
+</html>
