@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — JOVERIA Bulle</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-32.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JOVERIA Bulle">
+<meta name="theme-color" content="#0B0B0C">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Inter", sans-serif; background: #0B0B0C; color: #EDE7D9; min-height: 100vh; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-family: Georgia, serif; font-size: 18px; color: #E8C766; margin: 0 0 20px; }
+  #error { font-size: 12px; color: #E24B4A; text-align: center; padding: 60px 20px; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .qr-toggle { background: none; border: 1px solid #4A3E18; border-radius: 8px; color: #C9A227; font-size: 11px; padding: 7px 12px; cursor: pointer; }
+  .qr-panel { display: none; text-align: center; border: 1px solid #2A2517; border-radius: 12px; padding: 20px; margin-bottom: 18px; background: #0F0E10; }
+  .qr-panel #qrcode { background: #EDE7D9; display: inline-block; padding: 10px; border-radius: 8px; }
+  .qr-panel .link { font-size: 11px; color: #8A8678; margin-top: 10px; word-break: break-all; }
+  .board { display: flex; gap: 14px; height: 66vh; }
+  .list { width: 220px; border: 1px solid #2A2517; border-radius: 12px; overflow-y: auto; flex-shrink: 0; background: #0F0E10; }
+  .list .count { padding: 10px 14px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #8A8678; border-bottom: 1px solid #2A2517; }
+  .list-item { display: block; width: 100%; text-align: left; padding: 10px 12px; background: transparent; border: none; border-bottom: 1px solid #1D1B14; cursor: pointer; color: #EDE7D9; font-size: 11px; }
+  .list-item.active { background: #1A1812; }
+  .list-item .preview { color: #8A8678; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+  .thread { flex: 1; border: 1px solid #2A2517; border-radius: 12px; display: flex; flex-direction: column; background: #0F0E10; overflow: hidden; }
+  .thread-header { padding: 10px 14px; border-bottom: 1px solid #2A2517; display: flex; justify-content: space-between; align-items: center; }
+  .thread-header .del { background: none; border: 1px solid #4A3E18; border-radius: 6px; color: #8A8678; font-size: 10px; padding: 5px 9px; cursor: pointer; }
+  .messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+  .msg { max-width: 75%; padding: 8px 12px; border-radius: 11px; font-size: 12px; line-height: 1.4; }
+  .msg.commercant { align-self: flex-end; background: #C9A227; color: #0B0B0C; }
+  .msg.client { align-self: flex-start; background: #1A1812; color: #EDE7D9; }
+  .msg .t { font-size: 9px; opacity: .6; margin-top: 2px; }
+  .composer { display: flex; gap: 6px; padding: 10px; border-top: 1px solid #2A2517; }
+  .composer input { margin: 0; background: #1A1812; border: 1px solid #2A2517; border-radius: 8px; padding: 10px 12px; color: #EDE7D9; font-size: 13px; outline: none; flex: 1; }
+  .composer button { background: #C9A227; border: none; border-radius: 8px; width: 36px; cursor: pointer; flex-shrink: 0; }
+  .empty { flex: 1; display: flex; align-items: center; justify-content: center; color: #5C584C; font-size: 12px; }
+  .keep-request { padding: 8px 14px; background: #1A1812; font-size: 11px; color: #E8C766; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .keep-request button { background: none; border: 1px solid #4A3E18; border-radius: 6px; color: #C9A227; font-size: 10px; padding: 4px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="app"><div class="wrap"><div id="error"></div></div></div>
+
+<script>
+let currentBusiness = null;
+let currentBulleId = null;
+let listPoll = null;
+let threadPoll = null;
+let adminKey = null;
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  adminKey = params.get("key");
+  if (!adminKey) {
+    document.getElementById("error").innerHTML = `<div style="color:#E24B4A;font-size:13px;text-align:center;padding:60px 20px">Lien invalide. Utilise le lien qui t'a été remis par Joveria.</div>`;
+    return;
+  }
+  const { data: business, error } = await supabaseClient.rpc("get_business_by_admin_key", { admin_key: adminKey }).single();
+  if (error || !business) {
+    document.getElementById("error").innerHTML = `<div style="color:#E24B4A;font-size:13px;text-align:center;padding:60px 20px">Ce lien n'est plus valide.</div>`;
+    return;
+  }
+  currentBusiness = business;
+  render();
+}
+
+function render() {
+  document.getElementById("app").innerHTML = `
+    <div class="wrap">
+      <div class="top-row">
+        <h1>${currentBusiness.name}</h1>
+        <div style="display:flex;gap:8px">
+          <button class="qr-toggle" id="notif-toggle">Activer les notifications</button>
+          <button class="qr-toggle" id="qr-toggle">Afficher le QR client</button>
+        </div>
+      </div>
+      <div class="qr-panel" id="qr-panel">
+        <div id="qrcode"></div>
+        <div class="link" id="qr-link"></div>
+      </div>
+      <div class="board">
+        <div class="list" id="list"><div class="count" id="count">0 bulle ouverte</div></div>
+        <div class="thread" id="thread"><div class="empty">Sélectionnez une bulle.</div></div>
+      </div>
+    </div>`;
+
+  const clientUrl = window.location.origin + window.location.pathname.replace("dashboard.html", "client.html") + "?b=" + currentBusiness.slug;
+  document.getElementById("qr-link").textContent = clientUrl;
+  document.getElementById("qr-toggle").addEventListener("click", () => {
+    const panel = document.getElementById("qr-panel");
+    const visible = panel.style.display === "block";
+    panel.style.display = visible ? "none" : "block";
+    if (!visible && !panel.dataset.rendered) {
+      new QRCode(document.getElementById("qrcode"), { text: clientUrl, width: 140, height: 140 });
+      panel.dataset.rendered = "1";
+    }
+  });
+
+  document.getElementById("notif-toggle").addEventListener("click", enablePushNotifications);
+  updateNotifButtonLabel();
+
+  loadInbox();
+  if (listPoll) clearInterval(listPoll);
+  listPoll = setInterval(loadInbox, 4000);
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+}
+
+async function updateNotifButtonLabel() {
+  const btn = document.getElementById("notif-toggle");
+  if (!btn) return;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    btn.textContent = "Notifications non supportées";
+    btn.disabled = true;
+    return;
+  }
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  btn.textContent = sub ? "Notifications activées ✓" : "Activer les notifications";
+}
+
+async function enablePushNotifications() {
+  const btn = document.getElementById("notif-toggle");
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    alert("Notifications refusées. Tu peux les réactiver dans les réglages du navigateur.");
+    return;
+  }
+
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    });
+  }
+  await supabaseClient.rpc("save_push_subscription", { admin_key: adminKey, subscription: sub.toJSON() });
+  updateNotifButtonLabel();
+}
+
+async function loadInbox() {
+  const { data: bulles } = await supabaseClient.rpc("get_business_bulles", { admin_key: adminKey });
+  const list = document.getElementById("list");
+  if (!list) return;
+  document.getElementById("count").textContent = `${(bulles || []).length} bulle${(bulles || []).length > 1 ? "s" : ""} ouverte${(bulles || []).length > 1 ? "s" : ""}`;
+
+  list.querySelectorAll(".list-item").forEach(el => el.remove());
+  (bulles || []).forEach(b => {
+    const el = document.createElement("button");
+    el.className = "list-item" + (b.id === currentBulleId ? " active" : "");
+    el.innerHTML = `<div>Client anonyme</div><div class="preview">${b.last_message ? escapeHtml(b.last_message) : "Bulle vide"}</div>`;
+    el.addEventListener("click", () => openThread(b.id));
+    list.appendChild(el);
+  });
+  if (!bulles || bulles.length === 0) {
+    list.innerHTML += `<div style="padding:14px;font-size:10px;color:#5C584C">Aucune bulle pour le moment.</div>`;
+  }
+}
+
+async function openThread(id) {
+  currentBulleId = id;
+  loadInbox();
+  const thread = document.getElementById("thread");
+  thread.innerHTML = `
+    <div class="thread-header">
+      <span>Client anonyme</span>
+      <button class="del" id="del-btn">Supprimer</button>
+    </div>
+    <div id="keep-slot"></div>
+    <div class="messages" id="messages"></div>
+    <div class="composer">
+      <input id="reply-input" placeholder="Répondre…" />
+      <button id="reply-send"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0B0B0C" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>`;
+
+  document.getElementById("del-btn").addEventListener("click", async () => {
+    if (!confirm("Supprimer définitivement cette bulle ?")) return;
+    await supabaseClient.rpc("dashboard_delete_bulle", { admin_key: adminKey, bulle_id: id });
+    currentBulleId = null;
+    if (threadPoll) clearInterval(threadPoll);
+    document.getElementById("thread").innerHTML = `<div class="empty">Sélectionnez une bulle.</div>`;
+    loadInbox();
+  });
+  document.getElementById("reply-send").addEventListener("click", () => sendReply(id));
+  document.getElementById("reply-input").addEventListener("keydown", e => { if (e.key === "Enter") sendReply(id); });
+
+  loadThread(id);
+  if (threadPoll) clearInterval(threadPoll);
+  threadPoll = setInterval(() => loadThread(id), 3000);
+}
+
+async function loadThread(id) {
+  const { data: bulle } = await supabaseClient.rpc("get_bulle", { bulle_id: id }).single();
+  renderKeepSlot(bulle);
+  const { data: messages } = await supabaseClient.rpc("get_messages", { bulle_id: id });
+  const box = document.getElementById("messages");
+  if (!box) return;
+  const wasAtBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 10;
+  box.innerHTML = (messages || []).map(m => {
+    const time = new Date(m.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    return `<div class="msg ${m.sender}">${escapeHtml(m.text)}<div class="t">${time}</div></div>`;
+  }).join("");
+  if (wasAtBottom) box.scrollTop = box.scrollHeight;
+}
+
+function renderKeepSlot(bulle) {
+  const slot = document.getElementById("keep-slot");
+  if (!slot || !bulle) return;
+  if (bulle.retention_status === "kept") {
+    slot.innerHTML = `<div class="keep-request">Conversation conservée</div>`;
+  } else if (bulle.keep_request_status === "requested" && bulle.keep_requested_by === "client") {
+    slot.innerHTML = `<div class="keep-request"><span>Le client souhaite conserver cette conversation</span><span><button id="acc">Accepter</button> <button id="ref">Refuser</button></span></div>`;
+    document.getElementById("acc").addEventListener("click", () => respondKeep(bulle.id, "accepted"));
+    document.getElementById("ref").addEventListener("click", () => respondKeep(bulle.id, "refused"));
+  } else if (bulle.keep_request_status === "requested" && bulle.keep_requested_by === "commercant") {
+    slot.innerHTML = `<div class="keep-request">Demande envoyée au client, en attente de réponse</div>`;
+  } else {
+    slot.innerHTML = `<div class="keep-request"><span>Suppression automatique programmée</span><span><button id="req">Demander à conserver</button></span></div>`;
+    document.getElementById("req").addEventListener("click", async () => {
+      await supabaseClient.rpc("dashboard_request_keep", { admin_key: adminKey, bulle_id: bulle.id });
+      loadThread(bulle.id);
+    });
+  }
+}
+
+async function respondKeep(id, decision) {
+  await supabaseClient.rpc("dashboard_respond_keep", { admin_key: adminKey, bulle_id: id, decision });
+  loadThread(id);
+}
+
+async function sendReply(id) {
+  const input = document.getElementById("reply-input");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  await supabaseClient.rpc("dashboard_send_message", { admin_key: adminKey, bulle_id: id, message_text: text });
+  loadThread(id);
+}
+
+function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str; return div.innerHTML; }
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+init();
+</script>
+</body>
+</html>
