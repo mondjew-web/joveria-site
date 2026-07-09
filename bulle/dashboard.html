@@ -78,10 +78,7 @@ function render() {
     <div class="wrap">
       <div class="top-row">
         <h1>${currentBusiness.name}</h1>
-        <div style="display:flex;gap:8px">
-          <button class="qr-toggle" id="notif-toggle">Activer les notifications</button>
-          <button class="qr-toggle" id="qr-toggle">Afficher le QR client</button>
-        </div>
+        <button class="qr-toggle" id="qr-toggle">Afficher le QR client</button>
       </div>
       <div class="qr-panel" id="qr-panel">
         <div id="qrcode"></div>
@@ -105,54 +102,9 @@ function render() {
     }
   });
 
-  document.getElementById("notif-toggle").addEventListener("click", enablePushNotifications);
-  updateNotifButtonLabel();
-
   loadInbox();
   if (listPoll) clearInterval(listPoll);
   listPoll = setInterval(loadInbox, 4000);
-}
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
-}
-
-async function updateNotifButtonLabel() {
-  const btn = document.getElementById("notif-toggle");
-  if (!btn) return;
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-    btn.textContent = "Notifications non supportées";
-    btn.disabled = true;
-    return;
-  }
-  const reg = await navigator.serviceWorker.ready;
-  const sub = await reg.pushManager.getSubscription();
-  btn.textContent = sub ? "Notifications activées ✓" : "Activer les notifications";
-}
-
-async function enablePushNotifications() {
-  const btn = document.getElementById("notif-toggle");
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
-    alert("Notifications refusées. Tu peux les réactiver dans les réglages du navigateur.");
-    return;
-  }
-
-  const reg = await navigator.serviceWorker.ready;
-  let sub = await reg.pushManager.getSubscription();
-  if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
-  }
-  await supabaseClient.rpc("save_push_subscription", { admin_key: adminKey, subscription: sub.toJSON() });
-  updateNotifButtonLabel();
 }
 
 async function loadInbox() {
