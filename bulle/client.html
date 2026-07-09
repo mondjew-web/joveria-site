@@ -152,6 +152,10 @@
     if (bulle.retention_status === "kept") {
       statusText.textContent = "Conversation conservée";
       statusAction.innerHTML = "";
+    } else if (bulle.keep_request_status === "refused" && bulle.keep_requested_by === "client") {
+      statusText.textContent = "Le commerçant a refusé de conserver cette conversation";
+      statusAction.innerHTML = `<button id="ack-refuse">OK</button>`;
+      document.getElementById("ack-refuse").addEventListener("click", () => acknowledgeRefusal(bulle.id));
     } else if (bulle.keep_request_status === "requested" && bulle.keep_requested_by === "commercant") {
       statusText.textContent = "Le commerçant souhaite conserver cette conversation";
       statusAction.innerHTML = `<button id="accept-keep">Accepter</button> <button id="refuse-keep">Refuser</button>`;
@@ -169,6 +173,7 @@
 
   async function requestKeep(id) { await supabaseClient.rpc("request_keep", { bulle_id: id, requested_by: "client" }); loadStatus(id); }
   async function respondKeep(id, decision) { await supabaseClient.rpc("respond_keep", { bulle_id: id, decision }); loadStatus(id); }
+  async function acknowledgeRefusal(id) { await supabaseClient.rpc("respond_keep", { bulle_id: id, decision: "none" }); loadStatus(id); }
 })();
 </script>
 </body>
