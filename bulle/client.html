@@ -43,7 +43,7 @@
 <script>
 (async function () {
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("b");
+  const slug = params.get("b") || localStorage.getItem("joveria_last_slug");
   const app = document.getElementById("app");
   let pollTimer = null;
 
@@ -52,7 +52,12 @@
   if (!slug) { showError("Lien invalide. Ce QR code ne correspond à aucun commerçant."); return; }
 
   const { data: business, error: bizError } = await supabaseClient.rpc("get_business_public_info", { business_slug: slug }).single();
-  if (bizError || !business) { showError("Ce lien n'est plus valide."); return; }
+  if (bizError || !business) {
+    localStorage.removeItem("joveria_last_slug");
+    showError("Ce lien n'est plus valide.");
+    return;
+  }
+  localStorage.setItem("joveria_last_slug", slug);
 
   const storageKey = "joveria_bulle_" + slug;
   let bulleId = localStorage.getItem(storageKey);
