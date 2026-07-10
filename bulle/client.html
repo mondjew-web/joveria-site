@@ -70,13 +70,16 @@
       <div class="entry">
         <h1>${business.name}</h1>
         <p>Ouvrez une conversation privée avec ${business.name}, sans échanger de numéro. Elle sera supprimée automatiquement, sauf si vous demandez à la conserver.</p>
+        <input id="name-input" placeholder="Votre prénom ou surnom (facultatif)" style="width:100%;background:#1A1812;border:1px solid #2A2517;border-radius:8px;padding:10px 12px;color:#EDE7D9;font-size:13px;outline:none;margin-bottom:14px;box-sizing:border-box" maxlength="40" />
         <button class="primary" id="open-btn">Ouvrir une conversation privée</button>
       </div>`;
     document.getElementById("open-btn").addEventListener("click", openBulle);
   }
 
   async function openBulle() {
-    const { data, error } = await supabaseClient.rpc("open_bulle", { business_slug: slug }).single();
+    const nameInput = document.getElementById("name-input");
+    const clientName = nameInput ? nameInput.value.trim() : "";
+    const { data, error } = await supabaseClient.rpc("open_bulle", { business_slug: slug, client_name: clientName || null }).single();
     if (error) { showError("Impossible d'ouvrir la conversation. Réessayez."); return; }
     localStorage.setItem(storageKey, data.id);
     renderChat(data.id);
