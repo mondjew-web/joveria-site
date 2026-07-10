@@ -151,22 +151,30 @@ async function enablePushNotifications() {
   const btn = document.getElementById("notif-toggle");
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
 
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
-    alert("Notifications refusées. Tu peux les réactiver dans les réglages du navigateur.");
-    return;
-  }
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      alert("Notifications refusées. Tu peux les réactiver dans les réglages du navigateur.");
+      return;
+    }
 
-  const reg = await navigator.serviceWorker.ready;
-  let sub = await reg.pushManager.getSubscription();
-  if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+    const { error } = await supabaseClient.rpc("save_push_subscription", { admin_key: adminKey, subscription: sub.toJSON() });
+    if (error) {
+      alert("Erreur lors de l'enregistrement : " + error.message);
+      return;
+    }
+    updateNotifButtonLabel();
+  } catch (err) {
+    alert("Erreur : " + (err && err.message ? err.message : String(err)));
   }
-  await supabaseClient.rpc("save_push_subscription", { admin_key: adminKey, subscription: sub.toJSON() });
-  updateNotifButtonLabel();
 }
 
 async function loadInbox() {
