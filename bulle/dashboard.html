@@ -44,14 +44,15 @@
     body.thread-open .thread { height: 78vh; }
   }
   .back-to-list { display: none; background: none; border: none; color: #8A8678; font-size: 11px; cursor: pointer; align-items: center; gap: 4px; }
-  .thread-header { padding: 10px 14px; border-bottom: 1px solid #2A2517; display: flex; justify-content: space-between; align-items: center; }
+  .thread-header { flex-shrink: 0; padding: 10px 14px; border-bottom: 1px solid #2A2517; display: flex; justify-content: space-between; align-items: center; }
   .thread-header .del { background: none; border: 1px solid #4A3E18; border-radius: 6px; color: #8A8678; font-size: 10px; padding: 5px 9px; cursor: pointer; }
+  #keep-slot { flex-shrink: 0; }
   .messages { flex: 1; min-height: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
   .msg { max-width: 75%; padding: 8px 12px; border-radius: 11px; font-size: 12px; line-height: 1.4; white-space: pre-wrap; }
   .msg.commercant { align-self: flex-end; background: #C9A227; color: #0B0B0C; }
   .msg.client { align-self: flex-start; background: #1A1812; color: #EDE7D9; }
   .msg .t { font-size: 9px; opacity: .6; margin-top: 2px; }
-  .composer { display: flex; gap: 6px; padding: 10px; border-top: 1px solid #2A2517; }
+  .composer { flex-shrink: 0; display: flex; gap: 6px; padding: 10px; border-top: 1px solid #2A2517; }
   .composer input { margin: 0; background: #1A1812; border: 1px solid #2A2517; border-radius: 8px; padding: 10px 12px; color: #EDE7D9; font-size: 13px; outline: none; flex: 1; }
   .composer button { background: #C9A227; border: none; border-radius: 8px; width: 36px; cursor: pointer; flex-shrink: 0; }
   .empty { flex: 1; display: flex; align-items: center; justify-content: center; color: #5C584C; font-size: 12px; }

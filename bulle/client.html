@@ -22,7 +22,7 @@
   .entry p { font-size: 12px; color: #8A8678; line-height: 1.5; margin: 0 0 24px; }
   button.primary { width: 100%; padding: 13px 0; background: #C9A227; color: #0B0B0C; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
   .chat { display: flex; flex-direction: column; height: 80vh; max-height: 640px; }
-  .chat-header { padding: 12px 16px; background: #141216; border-bottom: 1px solid #2A2517; display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .chat-header { flex-shrink: 0; padding: 12px 16px; background: #141216; border-bottom: 1px solid #2A2517; display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
   .chat-header .name { color: #E8C766; font-family: Georgia, serif; }
   .status-bar { flex-shrink: 0; flex-wrap: wrap; padding: 8px 16px; font-size: 10px; color: #8A8678; background: #141216; border-bottom: 1px solid #2A2517; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .status-bar button { background: none; border: 1px solid #4A3E18; border-radius: 6px; color: #C9A227; font-size: 10px; padding: 4px 8px; cursor: pointer; }
@@ -31,7 +31,7 @@
   .msg.client { align-self: flex-end; background: #C9A227; color: #0B0B0C; }
   .msg.commercant { align-self: flex-start; background: #1A1812; color: #EDE7D9; }
   .msg .t { font-size: 9px; opacity: .6; margin-top: 3px; }
-  .composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #2A2517; background: #0F0E10; }
+  .composer { flex-shrink: 0; display: flex; gap: 8px; padding: 12px; border-top: 1px solid #2A2517; background: #0F0E10; }
   .composer input { flex: 1; background: #1A1812; border: 1px solid #2A2517; border-radius: 8px; padding: 10px 12px; color: #EDE7D9; font-size: 13px; outline: none; }
   .composer button { background: #C9A227; border: none; border-radius: 8px; width: 40px; cursor: pointer; }
   #error { font-size: 12px; color: #E24B4A; text-align: center; padding: 40px 20px; }
