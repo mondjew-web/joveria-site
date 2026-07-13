@@ -345,15 +345,21 @@ async function shareLocation(id) {
   if (btn) btn.disabled = true;
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
-      const lat = pos.coords.latitude.toFixed(6);
-      const lng = pos.coords.longitude.toFixed(6);
-      const text = `Ma position :\nhttps://www.waze.com/ul?ll=${lat},${lng}&navigate=yes\nhttps://www.google.com/maps?q=${lat},${lng}`;
-      await supabaseClient.rpc("dashboard_send_message", { admin_key: adminKey, bulle_id: id, message_text: text });
-      loadThread(id);
-      if (btn) btn.disabled = false;
+      try {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const text = `Ma position :\nhttps://www.waze.com/ul?ll=${lat},${lng}&navigate=yes\nhttps://www.google.com/maps?q=${lat},${lng}`;
+        const { error } = await supabaseClient.rpc("dashboard_send_message", { admin_key: adminKey, bulle_id: id, message_text: text });
+        if (error) { alert("Erreur lors de l'envoi de la position : " + error.message); return; }
+        loadThread(id);
+      } catch (err) {
+        alert("Erreur : " + (err && err.message ? err.message : String(err)));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     },
-    () => {
-      alert("Impossible d'obtenir la position. Vérifie que la géolocalisation est autorisée.");
+    (err) => {
+      alert("Impossible d'obtenir la position (" + err.message + "). Vérifie que la géolocalisation est autorisée dans les réglages.");
       if (btn) btn.disabled = false;
     }
   );
