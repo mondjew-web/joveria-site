@@ -69,6 +69,18 @@ let listPoll = null;
 let threadPoll = null;
 let adminKey = null;
 
+const DPA_TEXT = `
+<strong style="color:#E8C766">Accord de sous-traitance — traitement des données personnelles</strong><br><br>
+Entre vous (Responsable de traitement) et JOVERIA (Sous-traitant), fournisseur technique de l'outil « Bulle ».<br><br>
+<strong>Objet</strong> — Cet accord encadre le traitement des messages échangés entre vous et vos propres clients via l'outil Bulle.<br><br>
+<strong>Données traitées</strong> — Contenu des messages, horodatage, statut de conservation. Aucune coordonnée personnelle (téléphone, email) n'est collectée.<br><br>
+<strong>Durée de conservation</strong> — 7 jours par défaut après le dernier message, sauf conservation acceptée mutuellement par les deux parties de la conversation.<br><br>
+<strong>Obligations de Joveria</strong> — Traiter les données uniquement pour cette finalité, héberger au sein de l'Union Européenne, sécuriser l'accès par identifiant secret, supprimer les données selon la politique de rétention, informer en cas de violation de données.<br><br>
+<strong>Vos obligations</strong> — Vous assurer que l'usage de l'outil avec vos clients respecte le RGPD, ne pas détourner l'outil de son usage prévu.<br><br>
+<strong>Sous-traitant ultérieur</strong> — Supabase (hébergement base de données, Union Européenne).<br><br>
+En acceptant, vous confirmez avoir pris connaissance de cet accord et vous engagez à respecter les obligations qui vous incombent.
+`;
+
 async function init() {
   const params = new URLSearchParams(window.location.search);
   adminKey = params.get("key") || localStorage.getItem("joveria_admin_key");
@@ -84,7 +96,37 @@ async function init() {
   }
   localStorage.setItem("joveria_admin_key", adminKey);
   currentBusiness = business;
-  render();
+  if (!business.dpa_accepted_at) {
+    renderDpaGate();
+  } else {
+    render();
+  }
+}
+
+function renderDpaGate() {
+  document.getElementById("app").innerHTML = `
+    <div class="wrap" style="max-width:560px">
+      <h1>Avant de commencer</h1>
+      <div style="border:1px solid #2A2517;border-radius:12px;padding:20px;background:#0F0E10;max-height:50vh;overflow-y:auto;font-size:12px;line-height:1.6;color:#C7C2B4;margin-bottom:18px">
+        ${DPA_TEXT}
+      </div>
+      <div style="display:flex;gap:10px">
+        <button id="dpa-decline" style="flex:1;padding:12px 0;background:none;border:1px solid #4A3E18;border-radius:8px;color:#8A8678;font-size:13px;cursor:pointer">Refuser</button>
+        <button id="dpa-accept" style="flex:1;padding:12px 0;background:#C9A227;border:none;border-radius:8px;color:#0B0B0C;font-size:13px;font-weight:600;cursor:pointer">Accepter</button>
+      </div>
+      <div id="dpa-decline-msg" style="display:none;color:#E24B4A;font-size:12px;margin-top:14px;text-align:center">
+        L'accès au tableau de bord nécessite d'accepter cet accord. Contacte Joveria si tu as des questions.
+      </div>
+    </div>`;
+
+  document.getElementById("dpa-accept").addEventListener("click", async () => {
+    await supabaseClient.rpc("accept_dpa", { admin_key: adminKey });
+    currentBusiness.dpa_accepted_at = new Date().toISOString();
+    render();
+  });
+  document.getElementById("dpa-decline").addEventListener("click", () => {
+    document.getElementById("dpa-decline-msg").style.display = "block";
+  });
 }
 
 function render() {
