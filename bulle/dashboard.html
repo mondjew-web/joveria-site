@@ -38,10 +38,10 @@
     .top-row .qr-toggle { flex: 1; }
     .board { flex-direction: column; height: auto; }
     .list { width: 100%; max-height: 140px; }
-    .thread { height: 70vh; }
+    .thread { flex: none; height: 70vh; }
     .back-to-list { display: inline-flex !important; }
     body.thread-open .list { display: none; }
-    body.thread-open .thread { height: 78vh; }
+    body.thread-open .thread { flex: none; height: 78vh; }
   }
   .back-to-list { display: none; background: none; border: none; color: #8A8678; font-size: 11px; cursor: pointer; align-items: center; gap: 4px; }
   .thread-header { flex-shrink: 0; padding: 10px 14px; border-bottom: 1px solid #2A2517; display: flex; justify-content: space-between; align-items: center; }
