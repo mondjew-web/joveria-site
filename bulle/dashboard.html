@@ -302,9 +302,37 @@ async function openThread(id, clientLabel) {
   threadPoll = setInterval(() => loadThread(id), 3000);
 }
 
+function showDebugOverlay() {
+  let el = document.getElementById("debug-overlay");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "debug-overlay";
+    el.style.cssText = "position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-size:9px;padding:6px;z-index:9999;font-family:monospace;max-height:40vh;overflow-y:auto;white-space:pre-wrap";
+    document.body.appendChild(el);
+  }
+  setTimeout(() => {
+    const thread = document.getElementById("thread");
+    const keepSlot = document.getElementById("keep-slot");
+    const messages = document.getElementById("messages");
+    const header = document.querySelector(".thread-header");
+    const composer = document.querySelector(".composer");
+    const rect = (x) => x ? `h=${Math.round(x.getBoundingClientRect().height)} top=${Math.round(x.getBoundingClientRect().top)} bottom=${Math.round(x.getBoundingClientRect().bottom)}` : "absent";
+    el.textContent = [
+      `window.innerHeight=${window.innerHeight}`,
+      `body.classList=${document.body.className}`,
+      `thread: ${rect(thread)}`,
+      `header: ${rect(header)}`,
+      `keepSlot: ${rect(keepSlot)}`,
+      `messages: ${rect(messages)}`,
+      `composer: ${rect(composer)}`,
+    ].join("\n");
+  }, 300);
+}
+
 async function loadThread(id) {
   const { data: bulle } = await supabaseClient.rpc("get_bulle", { bulle_id: id }).single();
   renderKeepSlot(bulle);
+  showDebugOverlay();
   const { data: messages } = await supabaseClient.rpc("get_messages", { bulle_id: id });
   const box = document.getElementById("messages");
   if (!box) return;
