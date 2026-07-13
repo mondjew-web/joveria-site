@@ -27,7 +27,7 @@
   .status-bar { padding: 8px 16px; font-size: 10px; color: #8A8678; background: #141216; border-bottom: 1px solid #2A2517; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .status-bar button { background: none; border: 1px solid #4A3E18; border-radius: 6px; color: #C9A227; font-size: 10px; padding: 4px 8px; cursor: pointer; }
   .messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-  .msg { max-width: 78%; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; }
+  .msg { max-width: 78%; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
   .msg.client { align-self: flex-end; background: #C9A227; color: #0B0B0C; }
   .msg.commercant { align-self: flex-start; background: #1A1812; color: #EDE7D9; }
   .msg .t { font-size: 9px; opacity: .6; margin-top: 3px; }
@@ -94,13 +94,17 @@
     app.innerHTML = `
       <div class="chat">
         <div class="chat-header">
-          <button id="delete-btn" style="background:none;border:none;color:#8A8678;cursor:pointer;font-size:11px">Supprimer</button>
+          <div style="display:flex;gap:10px">
+            <button id="delete-btn" style="background:none;border:none;color:#8A8678;cursor:pointer;font-size:11px">Supprimer</button>
+            <button id="block-btn" style="background:none;border:none;color:#E24B4A;cursor:pointer;font-size:11px">Bloquer</button>
+          </div>
           <span class="name">${business.name}</span>
-          <span style="width:50px"></span>
+          <span style="width:80px"></span>
         </div>
         <div class="status-bar"><span id="status-text">Chargement…</span><span id="status-action"></span></div>
         <div class="messages" id="messages"></div>
         <div class="composer">
+          <button id="location-btn" title="Partager ma position" style="background:#1A1812;border:1px solid #2A2517;border-radius:8px;width:40px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A227" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
           <input id="input" placeholder="Votre message…" />
           <button id="send-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0B0B0C" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
         </div>
@@ -112,8 +116,15 @@
       localStorage.removeItem(storageKey);
       renderEntry();
     });
+    document.getElementById("block-btn").addEventListener("click", async () => {
+      if (!confirm("Bloquer cette conversation ? Les messages seront définitivement supprimés et plus personne ne pourra écrire ici.")) return;
+      await supabaseClient.rpc("block_bulle", { bulle_id: id, blocked_by: "client" });
+      loadStatus(id);
+      loadMessages(id);
+    });
     document.getElementById("send-btn").addEventListener("click", () => sendMessage(id));
     document.getElementById("input").addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(id); });
+    document.getElementById("location-btn").addEventListener("click", () => shareLocation(id));
 
     loadMessages(id);
     loadStatus(id);
@@ -132,9 +143,53 @@
 
   function renderMsg(m) {
     const time = new Date(m.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    return `<div class="msg ${m.sender}">${escapeHtml(m.text)}<div class="t">${time}</div></div>`;
+    return `<div class="msg ${m.sender}">${linkify(m.text)}<div class="t">${time}</div></div>`;
   }
   function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str; return div.innerHTML; }
+
+  function linkCardLabel(url) {
+    const u = url.toLowerCase();
+    if (u.includes("waze.com")) return "📍 Ouvrir dans Waze";
+    if (u.includes("maps.google") || u.includes("google.com/maps") || u.includes("goo.gl/maps") || u.includes("maps.app.goo.gl")) return "📍 Ouvrir dans Google Maps";
+    if (u.includes("maps.apple.com")) return "📍 Ouvrir dans Plans";
+    if (u.includes("drive.google.com")) return "📄 Ouvrir le document";
+    if (u.includes("youtube.com") || u.includes("youtu.be")) return "▶️ Voir la vidéo";
+    if (u.includes("instagram.com")) return "📷 Voir sur Instagram";
+    if (u.includes("tiktok.com")) return "🎵 Voir sur TikTok";
+    return "🔗 Ouvrir le lien";
+  }
+
+  function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map(part => {
+      if (/^https?:\/\//.test(part)) {
+        const label = linkCardLabel(part);
+        return `<a href="${escapeHtml(part)}" target="_blank" rel="noopener" style="display:block;margin:4px 0;padding:7px 10px;background:rgba(0,0,0,0.15);border-radius:8px;color:inherit;text-decoration:none;font-size:12px;font-weight:600">${label}</a>`;
+      }
+      return escapeHtml(part);
+    }).join("");
+  }
+
+  async function shareLocation(id) {
+    if (!navigator.geolocation) { alert("La géolocalisation n'est pas disponible sur cet appareil."); return; }
+    const btn = document.getElementById("location-btn");
+    if (btn) btn.disabled = true;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const text = `Ma position :\nhttps://www.waze.com/ul?ll=${lat},${lng}&navigate=yes\nhttps://www.google.com/maps?q=${lat},${lng}`;
+        await supabaseClient.rpc("send_message", { bulle_id: id, sender: "client", text });
+        loadMessages(id);
+        if (btn) btn.disabled = false;
+      },
+      () => {
+        alert("Impossible d'obtenir ta position. Vérifie que la géolocalisation est autorisée.");
+        if (btn) btn.disabled = false;
+      }
+    );
+  }
 
   async function sendMessage(id) {
     const input = document.getElementById("input");
@@ -155,6 +210,22 @@
     const statusText = document.getElementById("status-text");
     const statusAction = document.getElementById("status-action");
     if (!statusText) return;
+
+    const composer = document.querySelector(".composer");
+    const blockBtn = document.getElementById("block-btn");
+
+    if (bulle.status === "blocked") {
+      statusText.textContent = bulle.blocked_by === "client"
+        ? "Vous avez bloqué cette conversation"
+        : "Le commerçant a bloqué cette conversation";
+      statusAction.innerHTML = "";
+      if (composer) composer.style.display = "none";
+      if (blockBtn) blockBtn.style.display = "none";
+      return;
+    }
+    if (composer) composer.style.display = "flex";
+    if (blockBtn) blockBtn.style.display = "inline";
+
     const daysLeft = Math.max(0, Math.ceil((new Date(bulle.expires_at) - Date.now()) / (1000 * 60 * 60 * 24)));
 
     if (bulle.retention_status === "kept") {
