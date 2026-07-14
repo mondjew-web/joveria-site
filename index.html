@@ -946,8 +946,86 @@ function calc(){
   };
 }
 
-function buildResults(){
+function calcExtra(){
+    var weeks = 47;
+    var blendedRate = 35;
+  
+    var digitalMap = {
+          q1_1: {"Papier ou Word manuel":5, "Excel":2.5, "Logiciel dédié":0, "Mon comptable gère":1},
+          q1_2: {"Pointage papier":2.5, "Déclaratif oral ou SMS":3.5, "Application de pointage":0, "Pas de suivi formalisé":4.5},
+          q1_3: {"Tableau papier ou Excel":2.5, "Planning numérique partagé":0.5, "Au feeling / téléphone":4.5, "Logiciel dédié":0},
+          q1_4: {"Appels téléphoniques":2.5, "SMS ou WhatsApp":1.5, "Application métier dédiée":0, "Instructions orales sur site":3.5}
+    };
+    var orgaMap = {
+          q2_1: {"Jamais ou rarement":0, "Occasionnellement":2, "Souvent":4, "Très souvent":6},
+          q2_2: {"Pas de process formel":4, "Appel téléphonique":2, "Message écrit":1, "Outil de signalement dédié":0},
+          q2_4: {"Aucun":4, "Quelques documents non suivis":2.5, "Process écrits et appliqués":0.5, "Process écrits et mis à jour":0},
+          q2_5: {"Pas de suivi":3.5, "À l'œil / papier":2, "Tableau Excel":1, "Logiciel dédié":0}
+    };
+    var commMap = {
+          q3_1: {"Bouche-à-oreille":2, "Réseau professionnel (Capeb...)":1, "Appels d'offres":1.5, "Site web / réseaux sociaux":0.5},
+          q3_2: {"Moins de 20%":3, "20 à 40%":2, "40 à 60%":1, "Plus de 60%":0.5, "Je ne sais pas":3},
+          q3_3: {"Pas de relance systématique":4, "Relance téléphonique manuelle":2.5, "Relance par mail manuelle":1.5, "Relance automatisée":0},
+          q3_4: {"Aucune":2, "Réseau social seulement":1.5, "Site web basique":1, "Site optimisé avec avis clients":0}
+    };
+    var rhMap = {
+          q4_2: {"Bouche-à-oreille / réseau":1, "Annonces":2, "Cabinet / intérim":0.5, "Cooptation interne":0.5},
+          q4_3: {"Aucune difficulté":0, "Difficulté légère":1.5, "Difficulté notable":3, "Difficulté majeure":4.5},
+          q4_4: {"Jamais":3, "Seulement en cas de problème":2, "Annuellement":1, "Régulièrement":0}
+    };
+  
+    function sumMap(map, defaultEach){
+          var total = 0;
+          for(var qid in map){
+                  var val = map[qid][answers[qid]];
+                  total += (val !== undefined) ? val : defaultEach;
+          }
+          return total;
+    }
+  
+    var digitalHoursWeek = sumMap(digitalMap, 2.5);
+    var orgaHoursWeek = sumMap(orgaMap, 2);
+    var commHoursWeek = sumMap(commMap, 2);
+    var rhHoursWeek = sumMap(rhMap, 1.5);
+  
+    var digitalHoursYear = digitalHoursWeek * weeks;
+    var orgaHoursYear = orgaHoursWeek * weeks;
+    var commHoursYear = commHoursWeek * weeks;
+    var rhHoursYear = rhHoursWeek * weeks;
+  
+    var digitalSavingsLow = digitalHoursYear * 0.30;
+    var digitalSavingsHigh = digitalHoursYear * 0.45;
+    var orgaSavingsLow = orgaHoursYear * 0.25;
+    var orgaSavingsHigh = orgaHoursYear * 0.40;
+    var commSavingsLow = commHoursYear * 0.20;
+    var commSavingsHigh = commHoursYear * 0.35;
+    var rhSavingsLow = rhHoursYear * 0.20;
+    var rhSavingsHigh = rhHoursYear * 0.35;
+  
+    var extraHoursLow = digitalSavingsLow + orgaSavingsLow + commSavingsLow + rhSavingsLow;
+    var extraHoursHigh = digitalSavingsHigh + orgaSavingsHigh + commSavingsHigh + rhSavingsHigh;
+    var extraCostLow = extraHoursLow * blendedRate;
+    var extraCostHigh = extraHoursHigh * blendedRate;
+  
+    return {
+          digitalSavingsLow: Math.round(digitalSavingsLow),
+          digitalSavingsHigh: Math.round(digitalSavingsHigh),
+          orgaSavingsLow: Math.round(orgaSavingsLow),
+          orgaSavingsHigh: Math.round(orgaSavingsHigh),
+          commSavingsLow: Math.round(commSavingsLow),
+          commSavingsHigh: Math.round(commSavingsHigh),
+          rhSavingsLow: Math.round(rhSavingsLow),
+          rhSavingsHigh: Math.round(rhSavingsHigh),
+          extraHoursLow: Math.round(extraHoursLow),
+          extraHoursHigh: Math.round(extraHoursHigh),
+          extraCostLow: Math.round(extraCostLow),
+          extraCostHigh: Math.round(extraCostHigh)
+    };
+}
+  
+  function buildResults(){
   var r = calc();
+      var rx = calcExtra();
   var firstName = (lead.nom || '').split(' ')[0] || '';
   var html = '';
   if(firstName){
@@ -955,16 +1033,20 @@ function buildResults(){
   }
   html += '<div class="result-hero">';
   html += '<div class="label">Temps potentiellement récupéré par an</div>';
-  html += '<div class="figure">' + fmt(r.totalHoursLow) + ' — ' + fmt(r.totalHoursHigh) + ' heures</div>';
+    html += '<div class="figure">' + fmt(r.totalHoursLow + rx.extraHoursLow) + ' — ' + fmt(r.totalHoursHigh + rx.extraHoursHigh) + ' heures</div>';
   html += '<div style="font-size:13px; color:var(--text-onDark-soft); margin-top:6px;">Soit environ ' + fmt(r.totalDaysLow) + ' à ' + fmt(r.totalDaysHigh) + ' jours de travail complets</div>';
   html += '</div>';
 
   html += '<div class="result-grid">';
   html += '<div class="result-card"><div class="rlabel">Charge administrative</div><div class="rvalue">' + fmt(r.adminHoursSavingsLow) + ' — ' + fmt(r.adminHoursSavingsHigh) + ' h</div><div class="rsub">Sur ' + fmt(r.adminHoursYear) + ' h/an actuellement passées en saisie</div></div>';
   html += '<div class="result-card"><div class="rlabel">Turnover</div><div class="rvalue">' + fmt(r.turnoverHoursSavingsLow) + ' — ' + fmt(r.turnoverHoursSavingsHigh) + ' h</div><div class="rsub">' + r.departuresYear + ' départs estimés/an à recruter et former</div></div>';
+      html += '<div class="result-card"><div class="rlabel">Digital & outils</div><div class="rvalue">' + fmt(rx.digitalSavingsLow) + ' — ' + fmt(rx.digitalSavingsHigh) + ' h</div><div class="rsub">Devis, factures, plannings : le temps perdu dans les outils actuels</div></div>';
+      html += '<div class="result-card"><div class="rlabel">Organisation</div><div class="rvalue">' + fmt(rx.orgaSavingsLow) + ' — ' + fmt(rx.orgaSavingsHigh) + ' h</div><div class="rsub">Retards, incidents non tracés, process informels</div></div>';
+      html += '<div class="result-card"><div class="rlabel">Commercial</div><div class="rvalue">' + fmt(rx.commSavingsLow) + ' — ' + fmt(rx.commSavingsHigh) + ' h</div><div class="rsub">Prospection, relances et présence en ligne à structurer</div></div>';
+      html += '<div class="result-card"><div class="rlabel">Ressources humaines</div><div class="rvalue">' + fmt(rx.rhSavingsLow) + ' — ' + fmt(rx.rhSavingsHigh) + ' h</div><div class="rsub">Recrutement, fidélisation, suivi d\'équipe</div></div>';
   html += '</div>';
 
-  html += '<div class="disclaimer">Équivalent financier estimé : ' + fmt(r.totalLow) + ' € — ' + fmt(r.totalHigh) + ' € par an. Estimation basée sur des données sectorielles (étude Qonto/OpinionWay 2026 sur le temps administratif dans le BTP, étude Deloitte 2024 sur le coût du turnover) et sur vos réponses. Ces chiffres sont indicatifs et seront affinés lors de l\'audit complet.</div>';
+    html += '<div class="disclaimer">Équivalent financier estimé : ' + fmt(r.totalLow + rx.extraCostLow) + ' € — ' + fmt(r.totalHigh + rx.extraCostHigh) + ' € par an. Estimation basée sur des données sectorielles (étude Qonto/OpinionWay 2026 sur le temps administratif dans le BTP, étude Deloitte 2024 sur le coût du turnover) et sur vos réponses. Ces chiffres sont indicatifs et seront affinés lors de l\'audit complet.</div>';
 
   html += '<button type="button" class="btn-flat primary" id="btn-restart" style="width:100%;">Recommencer le diagnostic</button>';
 
