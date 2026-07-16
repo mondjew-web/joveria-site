@@ -1034,7 +1034,9 @@ function calcExtra(){
   html += '<div class="result-hero">';
   html += '<div class="label">Temps potentiellement récupéré par an</div>';
     html += '<div class="figure">' + fmt(r.totalHoursLow + rx.extraHoursLow) + ' — ' + fmt(r.totalHoursHigh + rx.extraHoursHigh) + ' heures</div>';
-  html += '<div style="font-size:13px; color:var(--text-onDark-soft); margin-top:6px;">Soit environ ' + fmt(r.totalDaysLow) + ' à ' + fmt(r.totalDaysHigh) + ' jours de travail complets</div>';
+  var totalDaysLowAll = Math.round((r.totalHoursLow + rx.extraHoursLow) / 8);
+  var totalDaysHighAll = Math.round((r.totalHoursHigh + rx.extraHoursHigh) / 8);
+  html += '<div style="font-size:13px; color:var(--text-onDark-soft); margin-top:6px;">Soit environ ' + fmt(totalDaysLowAll) + ' à ' + fmt(totalDaysHighAll) + ' jours de travail complets</div>';
   html += '</div>';
 
   html += '<div class="result-grid">';
@@ -1049,8 +1051,23 @@ function calcExtra(){
     html += '<div class="disclaimer">Équivalent financier estimé : ' + fmt(r.totalLow + rx.extraCostLow) + ' € — ' + fmt(r.totalHigh + rx.extraCostHigh) + ' € par an. Estimation basée sur des données sectorielles (étude Qonto/OpinionWay 2026 sur le temps administratif dans le BTP, étude Deloitte 2024 sur le coût du turnover) et sur vos réponses. Ces chiffres sont indicatifs et seront affinés lors de l\'audit complet.</div>';
 
   html += '<button type="button" class="btn-flat primary" id="btn-restart" style="width:100%;">Recommencer le diagnostic</button>';
+  html += '<button type="button" class="btn-flat" id="btn-export-audit" style="width:100%; margin-top:10px;">Télécharger mes réponses (pour l\'audit complet)</button>';
+  html += '<p style="font-size:12px; color:var(--text-onDark-soft); text-align:center; margin-top:8px;">Ce fichier reprend vos réponses ci-dessus. Envoyez-le à votre conseiller JOVERIA pour ne pas avoir à tout ressaisir lors de l\'audit complet.</p>';
 
   return html;
+}
+
+function exportAuditAnswers(){
+  var payload = { lead: lead, answers: answers };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'reponses_' + (lead.entreprise || 'client').replace(/[^A-Za-z0-9_\-]+/g, '_') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
 }
 
 btnNext.addEventListener('click', function(){
@@ -1075,6 +1092,10 @@ btnNext.addEventListener('click', function(){
             renderScreen(0);
             document.getElementById('audit').scrollIntoView({behavior:'smooth'});
           });
+        }
+        var exportBtn = document.getElementById('btn-export-audit');
+        if(exportBtn){
+          exportBtn.addEventListener('click', exportAuditAnswers);
         }
       }, 0);
     }
