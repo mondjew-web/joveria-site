@@ -747,6 +747,7 @@ footer .fine { font-size: 13px; }
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
 
@@ -1085,22 +1086,91 @@ btnNext.addEventListener('click', function(){
     if(sections[current].isResults){
       (function(){
         var r = calc();
-        fetch('https://api.web3forms.com/submit', {
+        var pdfBase64 = '';
+        try {
+          var jsPDFCtor = window.jspdf.jsPDF;
+          var doc = new jsPDFCtor({unit:'mm', format:'a4'});
+
+          doc.setFillColor(10,10,11);
+          doc.rect(0,0,210,297,'F');
+
+          doc.setDrawColor(156,122,61);
+          doc.setLineWidth(0.5);
+          doc.rect(8,8,194,281);
+
+          doc.setTextColor(212,175,55);
+          doc.setFont('times','bold');
+          doc.setFontSize(30);
+          doc.text('JOVERIA', 20, 34);
+          doc.setFontSize(11);
+          doc.setTextColor(180,160,120);
+          doc.setFont('times','italic');
+          doc.text('On creuse, vous gagnez du temps', 20, 43);
+
+          doc.setDrawColor(156,122,61);
+          doc.setLineWidth(0.3);
+          doc.line(20,50,190,50);
+
+          doc.setTextColor(230,222,205);
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(12);
+          doc.text('Bonjour ' + (lead.nom || '') + ',', 20, 65);
+          doc.text('Voici le recapitulatif de votre diagnostic express JOVERIA :', 20, 74);
+
+          doc.setDrawColor(156,122,61);
+          doc.setLineWidth(0.4);
+          doc.rect(20,85,170,32);
+          doc.setTextColor(212,175,55);
+          doc.setFont('times','bold');
+          doc.setFontSize(20);
+          doc.text(r.totalHoursLow + ' - ' + r.totalHoursHigh + ' heures / an', 30, 102);
+          doc.setFontSize(11);
+          doc.setTextColor(200,190,170);
+          doc.setFont('helvetica','normal');
+          doc.text('Soit environ ' + r.totalDaysLow + ' a ' + r.totalDaysHigh + ' jours de travail complets', 30, 110);
+
+          doc.setFontSize(11);
+          doc.setTextColor(210,200,180);
+          doc.text('Equivalent financier estime : ' + r.totalLow + ' EUR - ' + r.totalHigh + ' EUR par an', 20, 130);
+
+          doc.setFontSize(11);
+          doc.setTextColor(220,212,195);
+          var teaser = 'Cette estimation rapide se base sur vos reponses au diagnostic express. Un audit complet permettrait de creuser chaque axe (digital, organisation, commercial, RH) avec un plan d\'action chiffre et priorise.';
+          var teaserLines = doc.splitTextToSize(teaser, 170);
+          doc.text(teaserLines, 20, 145);
+
+          doc.setDrawColor(156,122,61);
+          doc.line(20,180,190,180);
+          doc.setFont('times','bold');
+          doc.setFontSize(12);
+          doc.setTextColor(212,175,55);
+          doc.text('John Lafon - JOVERIA', 20, 190);
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(10);
+          doc.setTextColor(200,190,170);
+          doc.text('contact@joveria.fr  -  06 95 43 25 00', 20, 197);
+          doc.text('joveria.fr  -  Beziers, Herault', 20, 203);
+
+          var dataUri = doc.output('datauristring');
+          pdfBase64 = dataUri.split(',')[1];
+        } catch(pdfErr) {
+          console.error('PDF generation error', pdfErr);
+        }
+
+        fetch('https://joveria-email-worker.joveria-john.workers.dev', {
           method: 'POST',
-          headers: {'Content-Type':'application/json', 'Accept':'application/json'},
+          headers: {'Content-Type':'application/json'},
           body: JSON.stringify({
-            access_key: '02c32298-afe9-4bc4-9444-14e0dce36030',
-            subject: 'Nouveau diagnostic JOVERIA complete',
-            from_name: 'Site JOVERIA',
             nom: lead.nom || '',
             entreprise: lead.entreprise || '',
             email: lead.email || '',
             telephone: lead.tel || '',
             temps_recupere: r.totalHoursLow + ' a ' + r.totalHoursHigh + ' heures/an',
             equivalent_financier: r.totalLow + ' a ' + r.totalHigh + ' euros/an',
-            reponses: JSON.stringify(answers)
+            reponses: JSON.stringify(answers),
+            pdf_base64: pdfBase64
           })
-        }).catch(function(e){ console.error('Web3Forms error', e); });
+        }).catch(function(e){ console.error('Worker error', e); });
       })();
       setTimeout(function(){
         var restartBtn = document.getElementById('btn-restart');
