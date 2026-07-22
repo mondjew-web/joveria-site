@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CRM JOVERIA</title>
+
+<!-- PWA : installation sur bureau Mac et écran d'accueil iPhone -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JOVERIA CRM">
+<link rel="icon" href="icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0B;
+    --panel:#141416;
+    --panel-2:#1B1B1E;
+    --gold:#C6A15B;
+    --gold-dim: rgba(198,161,91,0.35);
+    --text:#EDE7DA;
+    --text-2:#D8D2C4;
+    --text-muted:#8C8779;
+    --red:#C0604F;
+    --green:#7FA37A;
+    --blue:#8FB3D9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    margin:0;
+  }
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:4px;}
+
+  header.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 32px;
+    border-bottom:1px solid rgba(198,161,91,0.18);
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{
+    width:29px;height:34px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .brand h1{font-size:22px;letter-spacing:0.5px;color:var(--text);}
+  .brand h1 span{color:var(--gold);}
+  .brand small{display:block;color:var(--text-muted);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+
+  .top-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  button{
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    border-radius:6px;
+    border:1px solid rgba(198,161,91,0.35);
+    background:transparent;
+    color:var(--text);
+    padding:9px 16px;
+    font-size:13px;
+    transition:all .15s ease;
+  }
+  button:hover{border-color:var(--gold);background:rgba(198,161,91,0.08);}
+  button.primary{
+    background:var(--gold);
+    color:#0A0A0B;
+    border-color:var(--gold);
+    font-weight:600;
+  }
+  button.primary:hover{background:#d4b26e;}
+  button.danger{border-color:rgba(192,96,79,0.5);color:var(--red);}
+  button.danger:hover{background:rgba(192,96,79,0.1);border-color:var(--red);}
+  button.ghost{border-color:transparent;color:var(--text-muted);padding:6px 10px;}
+  button.ghost:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+  button:disabled{opacity:0.5;cursor:not-allowed;}
+
+  main{padding:28px 32px;max-width:1400px;margin:0 auto;}
+
+  .sync-bar{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--text-muted);margin-bottom:18px;flex-wrap:wrap;}
+  .sync-bar .dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);display:inline-block;}
+  .sync-bar .dot.ok{background:var(--green);}
+  .sync-bar .dot.off{background:var(--text-muted);}
+
+  .pipeline-tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid rgba(198,161,91,0.15);}
+  .pipeline-tab{
+    padding:12px 18px;
+    font-size:13.5px;
+    color:var(--text-muted);
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    user-select:none;
+    font-weight:500;
+  }
+  .pipeline-tab .count{color:var(--text-muted);font-size:11.5px;margin-left:4px;}
+  .pipeline-tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:600;}
+  .pipeline-tab.active .count{color:var(--gold);}
+  .pipeline-tab:hover:not(.active){color:var(--text);}
+
+  .dashboard{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:28px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid rgba(198,161,91,0.15);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .card .label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;}
+  .card .value{font-family:'Fraunces',serif;font-size:26px;color:var(--gold);}
+  .card .sub{font-size:12px;color:var(--text-2);margin-top:4px;}
+
+  .toolbar{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  input[type=text], input[type=search], input[type=number], input[type=date], input[type=email], input[type=tel], input[type=password], select, textarea{
+    background:var(--panel-2);
+    border:1px solid rgba(198,161,91,0.2);
+    color:var(--text);
+    border-radius:6px;
+    padding:9px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    outline:none;
+  }
+  input:focus, select:focus, textarea:focus{border-color:var(--gold);}
+  #searchInput{flex:1;min-width:200px;}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    padding:6px 13px;
+    border-radius:20px;
+    border:1px solid rgba(198,161,91,0.25);
+    font-size:12px;
+    color:var(--text-2);
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  .chip.active{background:var(--gold);color:#0A0A0B;border-color:var(--gold);font-weight:600;}
+  .chip:hover:not(.active){border-color:var(--gold);}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:10px;overflow:hidden;}
+  thead th{
+    text-align:left;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--text-muted);
+    padding:12px 16px;
+    border-bottom:1px solid rgba(198,161,91,0.18);
+  }
+  tbody td{
+    padding:13px 16px;
+    font-size:13px;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+    color:var(--text-2);
+  }
+  tbody tr{cursor:pointer;transition:background .1s;}
+  tbody tr:hover{background:rgba(198,161,91,0.05);}
+  tbody tr:last-child td{border-bottom:none;}
+  .name-cell strong{color:var(--text);display:block;font-size:13.5px;}
+  .name-cell span{color:var(--text-muted);font-size:11.5px;}
+  .sync-flag{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:6px;vertical-align:middle;}
+
+  .badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .badge.a_contacter{background:rgba(140,135,121,0.2);color:#C7C2B4;}
+  .badge.contacte{background:rgba(120,150,190,0.18);color:var(--blue);}
+  .badge.interesse{background:rgba(198,161,91,0.22);color:var(--gold);}
+  .badge.contact_client{background:rgba(140,135,121,0.2);color:#C7C2B4;}
+  .badge.audit{background:rgba(120,150,190,0.18);color:#8FB3D9;}
+  .badge.devis{background:rgba(198,161,91,0.18);color:var(--gold);}
+  .badge.signe{background:rgba(127,163,122,0.18);color:var(--green);}
+  .badge.auto_cours{background:rgba(127,163,122,0.28);color:var(--green);}
+  .badge.actif{background:rgba(127,163,122,0.35);color:#9FCB99;}
+  .badge.perdu{background:rgba(192,96,79,0.18);color:var(--red);}
+
+  .relance-overdue{color:var(--red);font-weight:600;}
+  .relance-soon{color:var(--gold);font-weight:600;}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--text-muted);
+  }
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.6);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 20px;
+    z-index:100;
+    overflow-y:auto;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--panel);
+    border:1px solid rgba(198,161,91,0.25);
+    border-radius:12px;
+    width:100%;
+    max-width:640px;
+    padding:28px 30px 30px;
+  }
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .modal-header h2{font-size:20px;}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:11.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;}
+  .field .hint{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+  .convert-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:rgba(198,161,91,0.08);
+    border:1px solid rgba(198,161,91,0.25);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-bottom:16px;
+    font-size:12.5px;
+    color:var(--text-2);
+  }
+
+  .tag-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .tag{
+    background:rgba(198,161,91,0.12);
+    border:1px solid rgba(198,161,91,0.3);
+    color:var(--gold);
+    padding:5px 10px;
+    border-radius:16px;
+    font-size:11.5px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .tag button{border:none;background:none;padding:0;color:var(--gold);font-size:13px;line-height:1;}
+  .auto-catalogue{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .auto-catalogue .chip{font-size:11.5px;padding:5px 11px;}
+
+  .notes-block{margin-top:6px;border-top:1px solid rgba(198,161,91,0.15);padding-top:16px;}
+  .note-item{background:var(--panel-2);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;color:var(--text-2);}
+  .note-item .note-date{color:var(--text-muted);font-size:10.5px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+  .note-add{display:flex;gap:8px;margin-top:10px;}
+  .note-add textarea{flex:1;min-height:44px;resize:vertical;}
+
+  .modal-footer{display:flex;justify-content:space-between;margin-top:22px;padding-top:18px;border-top:1px solid rgba(198,161,91,0.15);flex-wrap:wrap;gap:10px;}
+  textarea{width:100%;resize:vertical;min-height:70px;}
+
+  footer.foot{
+    text-align:center;
+    padding:24px;
+    color:var(--text-muted);
+    font-size:11.5px;
+    letter-spacing:0.5px;
+  }
+  @media (max-width:900px){
+    .dashboard{grid-template-columns:repeat(2,1fr);}
+    .field-grid{grid-template-columns:1fr;}
+    table thead{display:none;}
+    tbody tr{display:block;padding:10px 6px;}
+    tbody td{display:block;border:none;padding:4px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg class="mark" viewBox="180 0 320 370" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(340,30)">
+        <path d="M -128 0 L -118 12 L -55 178 C -42 209, -30 226, -20 244 C -10 258, -4 270, -4 280 C -4 296, -16 306, -36 309 C -70 314, -104 300, -118 272 C -116 302, -90 326, -54 330 C -18 334, 8 316, 10 288 C 12 256, -8 226, -24 197 L -90 24 C -98 14, -112 4, -128 0 Z" fill="#C6A15B" stroke="#C6A15B" stroke-width="14" stroke-linejoin="round"/>
+        <path d="M 128 0 L 118 12 L 55 178 C 42 209, 30 226, 20 244 C 10 258, 4 270, 4 280 C 4 296, 16 306, 36 309 C 70 314, 104 300, 118 272 C 116 302, 90 326, 54 330 C 18 334, -8 316, -10 288 C -12 256, 8 226, 24 197 L 90 24 C 98 14, 112 4, 128 0 Z" fill="#C6A15B" stroke="#C6A15B" stroke-width="14" stroke-linejoin="round"/>
+      </g>
+    </svg>
+    <div>
+      <h1>JOVER<span>IA</span></h1>
+      <small>CRM &middot; Gestion clientèle</small>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="ghost" id="btnAirtableSettings">⚙ Airtable</button>
+    <button id="btnSync">⟲ Synchroniser</button>
+    <button class="ghost" id="btnExportCsv">Export CSV</button>
+    <button id="btnExportJson">Exporter (JSON)</button>
+    <button id="btnImportJson">Importer</button>
+    <input type="file" id="fileImport" accept="application/json" style="display:none;">
+    <button class="primary" id="btnNewClient">+ Nouveau</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="sync-bar" id="syncBar"></div>
+
+  <div class="pipeline-tabs" id="pipelineTabs"></div>
+
+  <div class="dashboard" id="dashboard"></div>
+
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Rechercher un nom, une entreprise, une ville...">
+    <select id="secteurFilter">
+      <option value="">Tous secteurs</option>
+      <option value="Auto-entrepreneur">Auto-entrepreneur</option>
+      <option value="Artisan">Artisan</option>
+      <option value="TPE">TPE</option>
+      <option value="BTP">BTP</option>
+      <option value="Autre">Autre</option>
+    </select>
+  </div>
+
+  <div class="chips" id="stageChips"></div>
+  <div style="height:18px;"></div>
+
+  <table id="clientsTable">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Secteur</th>
+        <th>Étape</th>
+        <th>Valeur estimée</th>
+        <th>Prochaine relance</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="clientsBody"></tbody>
+  </table>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    Aucun client pour l'instant. Clique sur « + Nouveau » pour commencer.
+  </div>
+
+</main>
+
+<footer class="foot">JOVERIA — CRM interne. Données stockées localement dans ce navigateur, avec synchronisation optionnelle vers Airtable.</footer>
+
+<!-- Modal client -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Nouveau client</h2>
+      <button class="ghost" id="btnCloseModal">✕</button>
+    </div>
+
+    <form id="clientForm">
+
+      <div class="convert-banner" id="convertBanner" style="display:none;">
+        <span>Ce contact fait partie de la prospection à froid.</span>
+        <button type="button" id="btnConvert">Convertir en client →</button>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label>Pipeline</label>
+          <select id="f_pipeline">
+            <option value="Froid">Prospection à froid</option>
+            <option value="Client">Client (audit)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Étape</label>
+          <select id="f_etape"></select>
+        </div>
+        <div class="field">
+          <label>Nom du contact</label>
+          <input type="text" id="f_nom" required>
+        </div>
+        <div class="field">
+          <label>Entreprise</label>
+          <input type="text" id="f_entreprise">
+        </div>
+        <div class="field">
+          <label>Secteur</label>
+          <select id="f_secteur">
+            <option value="Auto-entrepreneur">Auto-entrepreneur</option>
+            <option value="Artisan">Artisan</option>
+            <option value="TPE">TPE</option>
+            <option value="BTP">BTP</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Ville</label>
+          <input type="text" id="f_ville">
+        </div>
+        <div class="field">
+          <label>Téléphone</label>
+          <input type="tel" id="f_telephone">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="f_email">
+        </div>
+        <div class="field">
+          <label>Source</label>
+          <select id="f_source">
+            <option value="Site vitrine">Site vitrine</option>
+            <option value="Bouche à oreille">Bouche à oreille</option>
+            <option value="Réseau">Réseau</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Valeur estimée (€)</label>
+          <input type="number" id="f_valeur" min="0" step="50">
+        </div>
+        <div class="field">
+          <label>Prochaine relance</label>
+          <input type="date" id="f_relance">
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>Automatisations livrées / prévues</label>
+        <div class="auto-catalogue" id="autoCatalogue"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input type="text" id="f_autoCustom" placeholder="Ajouter une automatisation spécifique...">
+          <button type="button" class="ghost" id="btnAddAutoCustom">Ajouter</button>
+        </div>
+        <div class="tag-list" id="autoTags"></div>
+      </div>
+
+      <div class="notes-block">
+        <label style="font-size:11.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;">Historique / notes</label>
+        <div id="notesList"></div>
+        <div class="note-add">
+          <textarea id="f_newNote" placeholder="Ajouter une note (appel, RDV, relance...)"></textarea>
+          <button type="button" id="btnAddNote">Ajouter</button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="danger" id="btnDeleteClient" style="display:none;">Supprimer ce client</button>
+        <div style="display:flex;gap:10px;margin-left:auto;">
+          <button type="button" class="ghost" id="btnCancel">Annuler</button>
+          <button type="submit" class="primary">Enregistrer</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal réglages Airtable -->
+<div class="overlay" id="airtableOverlay">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <h2>Réglages Airtable</h2>
+      <button class="ghost" id="btnCloseAirtableModal">✕</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--text-2);margin-top:0;">
+      Ces informations sont stockées uniquement dans ce navigateur. Elles permettent au CRM de récupérer
+      les fiches créées automatiquement (petit audit du site) et d'y renvoyer tes modifications.
+    </p>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Jeton d'accès personnel (PAT)</label>
+      <input type="password" id="at_pat" placeholder="patXXXXXXXXXXXXXX...">
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Base ID</label>
+      <input type="text" id="at_base" placeholder="appXXXXXXXXXXXXXX">
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Table ID (ou nom)</label>
+      <input type="text" id="at_table" placeholder="tblXXXXXXXXXXXXXX">
+    </div>
+    <div id="airtableTestResult" style="font-size:12.5px;margin-bottom:10px;"></div>
+    <div class="modal-footer" style="border-top:none;padding-top:0;margin-top:6px;">
+      <button type="button" class="danger" id="btnClearAirtable">Déconnecter</button>
+      <div style="display:flex;gap:10px;margin-left:auto;">
+        <button type="button" class="ghost" id="btnTestAirtable">Tester la connexion</button>
+        <button type="button" class="primary" id="btnSaveAirtable">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'joveria_crm_clients_v1';
+  const AIRTABLE_SETTINGS_KEY = 'joveria_crm_airtable_settings_v1';
+  const AIRTABLE_LAST_SYNC_KEY = 'joveria_crm_airtable_last_sync_v1';
+
+  // ---------- Stages / pipelines ----------
+  // Chaque étape correspond exactement à une option du champ "Étape" (single select) dans Airtable,
+  // et chaque pipeline correspond exactement au champ "Pipeline" (Froid / Client).
+  const STAGE_META = [
+    {label:'À contacter',              cls:'a_contacter'},
+    {label:'Contacté',                 cls:'contacte'},
+    {label:'Intéressé',                cls:'interesse'},
+    {label:'Contact client',           cls:'contact_client'},
+    {label:'Audit réalisé',            cls:'audit'},
+    {label:'Devis envoyé',             cls:'devis'},
+    {label:'Client signé',             cls:'signe'},
+    {label:'Automatisations en cours', cls:'auto_cours'},
+    {label:'Client actif',             cls:'actif'},
+    {label:'Perdu',                    cls:'perdu'}
+  ];
+  function stageMeta(label){
+    return STAGE_META.find(s=>s.label===label) || {label, cls:'a_contacter'};
+  }
+  const FROID_LABELS  = ['À contacter','Contacté','Intéressé','Perdu'];
+  const CLIENT_LABELS = ['Contact client','Audit réalisé','Devis envoyé','Client signé','Automatisations en cours','Client actif','Perdu'];
+  function stagesForPipeline(pipeline){
+    return pipeline === 'Froid' ? FROID_LABELS : CLIENT_LABELS;
+  }
+  function defaultStage(pipeline){
+    return pipeline === 'Froid' ? 'À contacter' : 'Contact client';
+  }
+
+  const AUTO_CATALOGUE = [
+    'Formulaire mobile',
+    'Base de statuts',
+    'Moteur de relance',
+    'Génération de documents',
+    'Alerte conditionnelle',
+    'Messagerie terrain (Bulle)',
+    'Extraction / OCR'
+  ];
+
+  // Ancien format (pipeline unique) -> nouveau format, pour compatibilité avec un éventuel export existant.
+  const LEGACY_STAGE_MAP = {
+    prospect:  {pipeline:'Client', etape:'Contact client'},
+    audit:     {pipeline:'Client', etape:'Audit réalisé'},
+    devis:     {pipeline:'Client', etape:'Devis envoyé'},
+    signe:     {pipeline:'Client', etape:'Client signé'},
+    auto_cours:{pipeline:'Client', etape:'Automatisations en cours'},
+    actif:     {pipeline:'Client', etape:'Client actif'},
+    perdu:     {pipeline:'Client', etape:'Perdu'}
+  };
+
+  let clients = loadClients();
+  let currentEditId = null;
+  let activeStageFilter = '';
+  let activePipeline = 'Client';
+
+  function migrateClient(c){
+    if(!c.pipeline){
+      const legacy = LEGACY_STAGE_MAP[c.etape] || {pipeline:'Client', etape:'Contact client'};
+      c.pipeline = legacy.pipeline;
+      c.etape = legacy.etape;
+    }
+    if(c.airtableId === undefined) c.airtableId = null;
+    if(!Array.isArray(c.notes)) c.notes = [];
+    if(!Array.isArray(c.automatisations)) c.automatisations = [];
+    return c;
+  }
+
+  function loadClients(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return arr.map(migrateClient);
+    }catch(e){ return []; }
+  }
+  function saveClients(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clients));
+  }
+  function uid(){
+    return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+  function todayISO(){
+    return new Date().toISOString().slice(0,10);
+  }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric'});
+  }
+  function fmtEuro(n){
+    n = Number(n)||0;
+    return n.toLocaleString('fr-FR') + ' €';
+  }
+  function escapeHtml(str){
+    if(!str) return '';
+    return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ---------- Airtable settings ----------
+  function loadAirtableSettings(){
+    try{
+      const raw = localStorage.getItem(AIRTABLE_SETTINGS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function saveAirtableSettings(s){
+    localStorage.setItem(AIRTABLE_SETTINGS_KEY, JSON.stringify(s));
+  }
+  function clearAirtableSettings(){
+    localStorage.removeItem(AIRTABLE_SETTINGS_KEY);
+  }
+  function isAirtableConfigured(){
+    const s = loadAirtableSettings();
+    return !!(s && s.pat && s.baseId && s.tableId);
+  }
+
+  function airtableUrl(settings, suffix){
+    return 'https://api.airtable.com/v0/' + settings.baseId + '/' + encodeURIComponent(settings.tableId) + (suffix||'');
+  }
+
+  // ---------- Mapping local <-> Airtable ----------
+  function notesToText(notes){
+    if(!notes || !notes.length) return '';
+    return [...notes].sort((a,b)=>a.date.localeCompare(b.date))
+      .map(n=> '['+fmtDate(n.date)+'] ' + n.texte).join('\n');
+  }
+
+  function localToFields(c){
+    const fields = {
+      'Nom': c.nom || '',
+      'Entreprise': c.entreprise || '',
+      'Secteur': c.secteur || 'Auto-entrepreneur',
+      'Ville': c.ville || '',
+      'Téléphone': c.telephone || '',
+      'Email': c.email || '',
+      'Pipeline': c.pipeline || 'Client',
+      'Étape': c.etape || defaultStage(c.pipeline),
+      'Source': c.source || 'Site vitrine',
+      'Valeur estimée': Number(c.valeurEstimee) || 0,
+      'Automatisations': (c.automatisations && c.automatisations.length) ? c.automatisations : [],
+      'Notes': notesToText(c.notes)
+    };
+    if(c.prochaineRelance) fields['Prochaine relance'] = c.prochaineRelance;
+    return fields;
+  }
+
+  function fieldsToLocal(record, existing){
+    const f = record.fields || {};
+    const pipeline = f['Pipeline'] || (existing && existing.pipeline) || 'Client';
+    const base = existing ? {...existing} : {
+      id: uid(),
+      dateCreation: (record.createdTime || new Date().toISOString()).slice(0,10),
+      notes: []
+    };
+    base.airtableId = record.id;
+    base.dateMaj = todayISO();
+    base.pipeline = pipeline;
+    base.etape = f['Étape'] || defaultStage(pipeline);
+    base.nom = f['Nom'] || base.nom || '';
+    base.entreprise = f['Entreprise'] || base.entreprise || '';
+    base.secteur = f['Secteur'] || base.secteur || 'Auto-entrepreneur';
+    base.ville = f['Ville'] || base.ville || '';
+    base.telephone = f['Téléphone'] || base.telephone || '';
+    base.email = f['Email'] || base.email || '';
+    base.source = f['Source'] || base.source || 'Site vitrine';
+    base.valeurEstimee = Number(f['Valeur estimée']) || base.valeurEstimee || 0;
+    base.prochaineRelance = f['Prochaine relance'] || base.prochaineRelance || '';
+    base.automatisations = Array.isArray(f['Automatisations']) ? f['Automatisations'] : (base.automatisations||[]);
+    // Si c'est une toute nouvelle fiche importée depuis Airtable, on transforme le texte "Notes" en une note initiale.
+    if(!existing && f['Notes']){
+      base.notes = [{date: todayISO(), texte: f['Notes']}];
+    }
+    return base;
+  }
+
+  function chunk(arr, size){
+    const out = [];
+    for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));
+    return out;
+  }
+
+  async function airtableRequest(settings, method, path, body){
+    const res = await fetch(airtableUrl(settings, path), {
+      method,
+      headers:{
+        'Authorization':'Bearer ' + settings.pat,
+        'Content-Type':'application/json'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const json = await res.json().catch(()=>({}));
+    if(!res.ok){
+      const msg = (json && json.error && (json.error.message || json.error.type)) || res.statusText;
+      throw new Error(msg);
+    }
+    return json;
+  }
+
+  async function airtableFetchAll(settings){
+    let records = [];
+    let offset = null;
+    do{
+      const suffix = '?pageSize=100' + (offset ? '&offset='+offset : '');
+      const json = await airtableRequest(settings, 'GET', suffix);
+      records = records.concat(json.records || []);
+      offset = json.offset || null;
+    } while(offset);
+    return records;
+  }
+
+  async function pushClient(settings, c){
+    const fields = localToFields(c);
+    if(c.airtableId){
+      await airtableRequest(settings, 'PATCH', '', {records:[{id:c.airtableId, fields}], typecast:true});
+    } else {
+      const json = await airtableRequest(settings, 'POST', '', {records:[{fields}], typecast:true});
+      if(json.records && json.records[0]) c.airtableId = json.records[0].id;
+    }
+  }
+
+  async function syncWithAirtable(){
+    const settings = loadAirtableSettings();
+    if(!settings || !settings.pat || !settings.baseId || !settings.tableId){
+      openAirtableModal();
+      return;
+    }
+    const btn = document.getElementById('btnSync');
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Synchronisation...';
+    try{
+      const records = await airtableFetchAll(settings);
+      let imported = 0;
+      records.forEach(rec=>{
+        const existing = clients.find(c=>c.airtableId === rec.id);
+        if(!existing){
+          clients.push(fieldsToLocal(rec, null));
+          imported++;
+        }
+      });
+
+      const toCreate = clients.filter(c=>!c.airtableId);
+      const toUpdate = clients.filter(c=>c.airtableId);
+      for(const c of toCreate) await pushClient(settings, c);
+      for(const c of toUpdate) await pushClient(settings, c);
+
+      saveClients();
+      localStorage.setItem(AIRTABLE_LAST_SYNC_KEY, new Date().toISOString());
+      render();
+      renderSyncBar();
+      btn.textContent = originalLabel;
+      btn.disabled = false;
+      alert('Synchronisation terminée : ' + imported + ' nouvelle(s) fiche(s) importée(s) depuis Airtable, ' + clients.length + ' fiche(s) au total mises à jour vers Airtable.');
+    }catch(err){
+      btn.textContent = originalLabel;
+      btn.disabled = false;
+      alert('Erreur de synchronisation Airtable : ' + err.message);
+    }
+  }
+
+  function renderSyncBar(){
+    const bar = document.getElementById('syncBar');
+    const configured = isAirtableConfigured();
+    const last = localStorage.getItem(AIRTABLE_LAST_SYNC_KEY);
+    let lastText = 'jamais';
+    if(last){
+      const d = new Date(last);
+      lastText = d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    }
+    bar.innerHTML = `
+      <span class="dot ${configured?'ok':'off'}"></span>
+      <span>${configured ? 'Airtable connecté' : 'Airtable non connecté (données stockées localement uniquement)'}</span>
+      ${configured ? '<span>· Dernière synchro : '+lastText+'</span>' : ''}
+    `;
+  }
+
+  // ---------- Airtable settings modal ----------
+  function openAirtableModal(){
+    const s = loadAirtableSettings() || {};
+    document.getElementById('at_pat').value = s.pat || '';
+    document.getElementById('at_base').value = s.baseId || '';
+    document.getElementById('at_table').value = s.tableId || '';
+    document.getElementById('airtableTestResult').textContent = '';
+    document.getElementById('airtableOverlay').classList.add('open');
+  }
+  function closeAirtableModal(){
+    document.getElementById('airtableOverlay').classList.remove('open');
+  }
+  document.getElementById('btnAirtableSettings').addEventListener('click', openAirtableModal);
+  document.getElementById('btnCloseAirtableModal').addEventListener('click', closeAirtableModal);
+  document.getElementById('airtableOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'airtableOverlay') closeAirtableModal();
+  });
+
+  document.getElementById('btnTestAirtable').addEventListener('click', async ()=>{
+    const settings = {
+      pat: document.getElementById('at_pat').value.trim(),
+      baseId: document.getElementById('at_base').value.trim(),
+      tableId: document.getElementById('at_table').value.trim()
+    };
+    const resultEl = document.getElementById('airtableTestResult');
+    if(!settings.pat || !settings.baseId || !settings.tableId){
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = 'Merci de remplir les 3 champs.';
+      return;
+    }
+    resultEl.style.color = 'var(--text-muted)';
+    resultEl.textContent = 'Test en cours...';
+    try{
+      const json = await airtableRequest(settings, 'GET', '?pageSize=1');
+      resultEl.style.color = 'var(--green)';
+      resultEl.textContent = 'Connexion réussie (' + (json.records ? json.records.length : 0) + ' fiche(s) visible(s) sur ce test).';
+    }catch(err){
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = 'Échec : ' + err.message;
+    }
+  });
+
+  document.getElementById('btnSaveAirtable').addEventListener('click', ()=>{
+    const settings = {
+      pat: document.getElementById('at_pat').value.trim(),
+      baseId: document.getElementById('at_base').value.trim(),
+      tableId: document.getElementById('at_table').value.trim()
+    };
+    if(!settings.pat || !settings.baseId || !settings.tableId){
+      alert('Merci de remplir les 3 champs avant d\'enregistrer.');
+      return;
+    }
+    saveAirtableSettings(settings);
+    closeAirtableModal();
+    renderSyncBar();
+    alert('Réglages Airtable enregistrés. Clique sur « Synchroniser » pour récupérer les fiches existantes.');
+  });
+
+  document.getElementById('btnClearAirtable').addEventListener('click', ()=>{
+    if(confirm('Déconnecter Airtable ? Le CRM continuera de fonctionner en local uniquement.')){
+      clearAirtableSettings();
+      closeAirtableModal();
+      renderSyncBar();
+    }
+  });
+
+  document.getElementById('btnSync').addEventListener('click', syncWithAirtable);
+
+  // ---------- Pipeline tabs ----------
+  function renderPipelineTabs(){
+    const froidCount = clients.filter(c=>c.pipeline==='Froid').length;
+    const clientCount = clients.filter(c=>c.pipeline==='Client').length;
+    const wrap = document.getElementById('pipelineTabs');
+    wrap.innerHTML = `
+      <div class="pipeline-tab ${activePipeline==='Client'?'active':''}" data-pipeline="Client">Clients (petit audit) <span class="count">${clientCount}</span></div>
+      <div class="pipeline-tab ${activePipeline==='Froid'?'active':''}" data-pipeline="Froid">Prospection à froid <span class="count">${froidCount}</span></div>
+    `;
+    wrap.querySelectorAll('.pipeline-tab').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        activePipeline = tab.dataset.pipeline;
+        activeStageFilter = '';
+        render();
+      });
+    });
+  }
+
+  // ---------- Stage chips ----------
+  function renderStageChips(){
+    const chipsWrap = document.getElementById('stageChips');
+    const labels = stagesForPipeline(activePipeline);
+    let chipsHtml = `<div class="chip ${activeStageFilter===''?'active':''}" data-stage="">Tous</div>`;
+    chipsHtml += labels.map(l=>`<div class="chip ${activeStageFilter===l?'active':''}" data-stage="${escapeHtml(l)}">${escapeHtml(l)}</div>`).join('');
+    chipsWrap.innerHTML = chipsHtml;
+    chipsWrap.querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        activeStageFilter = chip.dataset.stage;
+        render();
+      });
+    });
+  }
+
+  function initAutoCatalogue(){
+    const catWrap = document.getElementById('autoCatalogue');
+    catWrap.innerHTML = AUTO_CATALOGUE.map(a=>`<div class="chip" data-auto="${escapeHtml(a)}">${escapeHtml(a)}</div>`).join('');
+    catWrap.querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        addAutoTag(chip.dataset.auto);
+      });
+    });
+  }
+
+  function populateEtapeSelect(pipeline, selected){
+    const etapeSelect = document.getElementById('f_etape');
+    const labels = stagesForPipeline(pipeline);
+    etapeSelect.innerHTML = labels.map(l=>`<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+    etapeSelect.value = labels.includes(selected) ? selected : defaultStage(pipeline);
+  }
+
+  // ---------- Dashboard ----------
+  function renderDashboard(){
+    const scoped = clients.filter(c=>c.pipeline===activePipeline);
+    let cards;
+
+    if(activePipeline === 'Froid'){
+      const enCours = scoped.filter(c=>c.etape!=='Perdu');
+      const interesses = scoped.filter(c=>c.etape==='Intéressé').length;
+      const perdus = scoped.filter(c=>c.etape==='Perdu').length;
+      const taux = scoped.length>0 ? Math.round((interesses/scoped.length)*100) : 0;
+      cards = [
+        {label:'Prospects à froid', value: scoped.length, sub: enCours.length + ' encore actifs'},
+        {label:'À contacter', value: scoped.filter(c=>c.etape==='À contacter').length, sub:'Pas encore approchés'},
+        {label:'Intéressés', value: interesses, sub: taux + '% des prospects à froid'},
+        {label:'Perdus', value: perdus, sub: perdus>0 ? 'Sans suite' : 'Aucun pour l\'instant'}
+      ];
+    } else {
+      const pipelineStages = ['Contact client','Audit réalisé','Devis envoyé'];
+      const wonStages = ['Client signé','Automatisations en cours','Client actif'];
+      const active = scoped.filter(c=>c.etape!=='Perdu');
+      const caPipeline = scoped.filter(c=>pipelineStages.includes(c.etape)).reduce((sum,c)=>sum+(Number(c.valeurEstimee)||0),0);
+      const caSigne = scoped.filter(c=>wonStages.includes(c.etape)).reduce((sum,c)=>sum+(Number(c.valeurEstimee)||0),0);
+      const totalSigne = scoped.filter(c=>wonStages.includes(c.etape)).length;
+      const tauxConversion = active.length>0 ? Math.round((totalSigne/active.length)*100) : 0;
+      const today = todayISO();
+      const relancesRetard = scoped.filter(c=>c.etape!=='Perdu' && c.prochaineRelance && c.prochaineRelance < today).length;
+      cards = [
+        {label:'Clients en pipeline', value: scoped.filter(c=>pipelineStages.includes(c.etape)).length, sub: active.length + ' clients actifs au total'},
+        {label:'CA pipeline estimé', value: fmtEuro(caPipeline), sub:'Contact client + Audit + Devis'},
+        {label:'CA clients signés', value: fmtEuro(caSigne), sub: 'Taux de conversion ' + tauxConversion + '%'},
+        {label:'Relances en retard', value: relancesRetard, sub: relancesRetard>0 ? 'À traiter en priorité' : 'Tout est à jour'}
+      ];
+    }
+
+    document.getElementById('dashboard').innerHTML = cards.map(c=>`
+      <div class="card">
+        <div class="label">${c.label}</div>
+        <div class="value">${c.value}</div>
+        <div class="sub">${c.sub}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- List / filters ----------
+  function getFiltered(){
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    const secteur = document.getElementById('secteurFilter').value;
+
+    return clients.filter(c=>{
+      if(c.pipeline !== activePipeline) return false;
+      if(activeStageFilter && c.etape !== activeStageFilter) return false;
+      if(secteur && c.secteur !== secteur) return false;
+      if(search){
+        const hay = (c.nom+' '+c.entreprise+' '+c.ville).toLowerCase();
+        if(!hay.includes(search)) return false;
+      }
+      return true;
+    }).sort((a,b)=>{
+      const ra = a.prochaineRelance || '9999-99-99';
+      const rb = b.prochaineRelance || '9999-99-99';
+      return ra.localeCompare(rb);
+    });
+  }
+
+  function renderList(){
+    const list = getFiltered();
+    const body = document.getElementById('clientsBody');
+    const empty = document.getElementById('emptyState');
+    const table = document.getElementById('clientsTable');
+    const scopedTotal = clients.filter(c=>c.pipeline===activePipeline).length;
+
+    if(scopedTotal === 0){
+      body.innerHTML = '';
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      empty.textContent = activePipeline === 'Froid'
+        ? "Aucun prospect à froid pour l'instant. Clique sur « + Nouveau » pour en ajouter un."
+        : "Aucun client pour l'instant. Les fiches créées via le petit audit du site apparaîtront ici après synchronisation.";
+      return;
+    }
+    if(list.length === 0){
+      body.innerHTML = '';
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      empty.textContent = "Aucune fiche ne correspond à ces filtres.";
+      return;
+    }
+    table.style.display = 'table';
+    empty.style.display = 'none';
+
+    const today = todayISO();
+    const in7 = new Date(); in7.setDate(in7.getDate()+7);
+    const in7ISO = in7.toISOString().slice(0,10);
+
+    body.innerHTML = list.map(c=>{
+      let relanceClass = '';
+      if(c.prochaineRelance){
+        if(c.prochaineRelance < today) relanceClass = 'relance-overdue';
+        else if(c.prochaineRelance <= in7ISO) relanceClass = 'relance-soon';
+      }
+      const meta = stageMeta(c.etape);
+      return `
+        <tr data-id="${c.id}">
+          <td class="name-cell"><strong>${escapeHtml(c.entreprise || c.nom)}${c.airtableId? '<span class="sync-flag" title="Synchronisé avec Airtable"></span>':''}</strong><span>${escapeHtml(c.nom)}${c.ville? ' · '+escapeHtml(c.ville):''}</span></td>
+          <td>${escapeHtml(c.secteur||'—')}</td>
+          <td><span class="badge ${meta.cls}">${escapeHtml(c.etape)}</span></td>
+          <td>${fmtEuro(c.valeurEstimee)}</td>
+          <td class="${relanceClass}">${fmtDate(c.prochaineRelance)}</td>
+          <td><button class="ghost" data-edit="${c.id}">Ouvrir</button></td>
+        </tr>
+      `;
+    }).join('');
+
+    body.querySelectorAll('tr').forEach(tr=>{
+      tr.addEventListener('click', ()=> openModal(tr.dataset.id));
+    });
+  }
+
+  function render(){
+    renderPipelineTabs();
+    renderStageChips();
+    renderDashboard();
+    renderList();
+  }
+
+  // ---------- Modal / form ----------
+  let draftAutomatisations = [];
+  let draftNotes = [];
+  let draftPipeline = 'Client';
+
+  function openModal(id){
+    currentEditId = id || null;
+    const client = id ? clients.find(c=>c.id===id) : null;
+
+    document.getElementById('modalTitle').textContent = client ? 'Modifier la fiche' : 'Nouveau';
+    document.getElementById('btnDeleteClient').style.display = client ? 'inline-block' : 'none';
+
+    draftPipeline = client ? client.pipeline : activePipeline;
+
+    document.getElementById('f_pipeline').value = draftPipeline;
+    populateEtapeSelect(draftPipeline, client?.etape);
+
+    document.getElementById('f_nom').value = client?.nom || '';
+    document.getElementById('f_entreprise').value = client?.entreprise || '';
+    document.getElementById('f_secteur').value = client?.secteur || 'Auto-entrepreneur';
+    document.getElementById('f_ville').value = client?.ville || '';
+    document.getElementById('f_telephone').value = client?.telephone || '';
+    document.getElementById('f_email').value = client?.email || '';
+    document.getElementById('f_source').value = client?.source || 'Site vitrine';
+    document.getElementById('f_valeur').value = client?.valeurEstimee || '';
+    document.getElementById('f_relance').value = client?.prochaineRelance || '';
+
+    draftAutomatisations = client ? [...(client.automatisations||[])] : [];
+    draftNotes = client ? [...(client.notes||[])] : [];
+
+    updateConvertBanner();
+    renderAutoTags();
+    renderNotes();
+
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function updateConvertBanner(){
+    const banner = document.getElementById('convertBanner');
+    banner.style.display = (draftPipeline === 'Froid') ? 'flex' : 'none';
+  }
+
+  document.getElementById('f_pipeline').addEventListener('change', (e)=>{
+    draftPipeline = e.target.value;
+    populateEtapeSelect(draftPipeline, defaultStage(draftPipeline));
+    updateConvertBanner();
+  });
+
+  document.getElementById('btnConvert').addEventListener('click', ()=>{
+    draftPipeline = 'Client';
+    document.getElementById('f_pipeline').value = 'Client';
+    populateEtapeSelect('Client', 'Contact client');
+    updateConvertBanner();
+    draftNotes.push({date: todayISO(), texte: 'Converti de la prospection à froid vers le pipeline client.'});
+    renderNotes();
+  });
+
+  function closeModal(){
+    document.getElementById('overlay').classList.remove('open');
+    currentEditId = null;
+    draftAutomatisations = [];
+    draftNotes = [];
+    document.getElementById('clientForm').reset();
+  }
+
+  function addAutoTag(name){
+    name = (name||'').trim();
+    if(!name) return;
+    if(!draftAutomatisations.includes(name)) draftAutomatisations.push(name);
+    renderAutoTags();
+  }
+  function removeAutoTag(name){
+    draftAutomatisations = draftAutomatisations.filter(a=>a!==name);
+    renderAutoTags();
+  }
+  function renderAutoTags(){
+    document.getElementById('autoTags').innerHTML = draftAutomatisations.map(a=>`
+      <div class="tag">${escapeHtml(a)}<button type="button" data-remove-auto="${escapeHtml(a)}">✕</button></div>
+    `).join('');
+    document.querySelectorAll('[data-remove-auto]').forEach(btn=>{
+      btn.addEventListener('click', ()=> removeAutoTag(btn.dataset.removeAuto));
+    });
+  }
+
+  function renderNotes(){
+    const list = document.getElementById('notesList');
+    if(draftNotes.length === 0){
+      list.innerHTML = `<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Aucune note pour l'instant.</div>`;
+      return;
+    }
+    const sorted = [...draftNotes].sort((a,b)=> b.date.localeCompare(a.date));
+    list.innerHTML = sorted.map(n=>`
+      <div class="note-item">
+        <div class="note-date">${fmtDate(n.date)}</div>
+        <div>${escapeHtml(n.texte)}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('btnAddAutoCustom').addEventListener('click', ()=>{
+    const input = document.getElementById('f_autoCustom');
+    addAutoTag(input.value);
+    input.value = '';
+  });
+
+  document.getElementById('btnAddNote').addEventListener('click', ()=>{
+    const ta = document.getElementById('f_newNote');
+    const texte = ta.value.trim();
+    if(!texte) return;
+    draftNotes.push({date: todayISO(), texte});
+    ta.value = '';
+    renderNotes();
+  });
+
+  document.getElementById('clientForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const pipeline = document.getElementById('f_pipeline').value;
+    const existing = currentEditId ? clients.find(c=>c.id===currentEditId) : null;
+    const data = {
+      id: currentEditId || uid(),
+      airtableId: existing ? existing.airtableId : null,
+      dateCreation: existing ? (existing.dateCreation || todayISO()) : todayISO(),
+      dateMaj: todayISO(),
+      pipeline: pipeline,
+      nom: document.getElementById('f_nom').value.trim(),
+      entreprise: document.getElementById('f_entreprise').value.trim(),
+      secteur: document.getElementById('f_secteur').value,
+      ville: document.getElementById('f_ville').value.trim(),
+      telephone: document.getElementById('f_telephone').value.trim(),
+      email: document.getElementById('f_email').value.trim(),
+      etape: document.getElementById('f_etape').value,
+      source: document.getElementById('f_source').value,
+      valeurEstimee: Number(document.getElementById('f_valeur').value) || 0,
+      prochaineRelance: document.getElementById('f_relance').value,
+      automatisations: draftAutomatisations,
+      notes: draftNotes
+    };
+
+    if(currentEditId){
+      const idx = clients.findIndex(c=>c.id===currentEditId);
+      clients[idx] = data;
+    } else {
+      clients.push(data);
+    }
+    saveClients();
+    closeModal();
+    activePipeline = pipeline;
+    render();
+
+    // Synchronisation immédiate et silencieuse si Airtable est configuré, sans bloquer l'interface.
+    const settings = loadAirtableSettings();
+    if(settings && settings.pat && settings.baseId && settings.tableId){
+      pushClient(settings, data).then(()=>{
+        saveClients();
+        localStorage.setItem(AIRTABLE_LAST_SYNC_KEY, new Date().toISOString());
+        renderList();
+        renderSyncBar();
+      }).catch(err=>{
+        console.error('Envoi Airtable échoué', err);
+      });
+    }
+  });
+
+  document.getElementById('btnDeleteClient').addEventListener('click', ()=>{
+    if(!currentEditId) return;
+    if(confirm('Supprimer définitivement cette fiche du CRM local ?\n(Elle restera dans Airtable si elle y est déjà synchronisée — Airtable ne permet pas la suppression automatique.)')){
+      clients = clients.filter(c=>c.id!==currentEditId);
+      saveClients();
+      closeModal();
+      render();
+    }
+  });
+
+  document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('overlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'overlay') closeModal();
+  });
+  document.getElementById('btnNewClient').addEventListener('click', ()=> openModal(null));
+
+  // ---------- Filters ----------
+  document.getElementById('searchInput').addEventListener('input', renderList);
+  document.getElementById('secteurFilter').addEventListener('change', renderList);
+
+  // ---------- Export / Import ----------
+  document.getElementById('btnExportJson').addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify(clients, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'joveria-crm-export-' + todayISO() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnExportCsv').addEventListener('click', ()=>{
+    const headers = ['Pipeline','Nom','Entreprise','Secteur','Ville','Telephone','Email','Etape','Source','ValeurEstimee','ProchaineRelance','Automatisations'];
+    const rows = clients.map(c=>[
+      c.pipeline, c.nom, c.entreprise, c.secteur, c.ville, c.telephone, c.email,
+      c.etape, c.source, c.valeurEstimee, c.prochaineRelance,
+      (c.automatisations||[]).join(' | ')
+    ]);
+    const csv = [headers, ...rows].map(row=>
+      row.map(v=> `"${String(v??'').replace(/"/g,'""')}"`).join(';')
+    ).join('\n');
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'joveria-crm-export-' + todayISO() + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnImportJson').addEventListener('click', ()=>{
+    document.getElementById('fileImport').click();
+  });
+  document.getElementById('fileImport').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const imported = JSON.parse(reader.result).map(migrateClient);
+        if(!Array.isArray(imported)) throw new Error('Format invalide');
+        const mode = confirm('OK = Remplacer toutes les données actuelles.\nAnnuler = Fusionner avec les données existantes.');
+        if(mode){
+          clients = imported;
+        } else {
+          const existingIds = new Set(clients.map(c=>c.id));
+          imported.forEach(c=>{
+            if(existingIds.has(c.id)){
+              const idx = clients.findIndex(x=>x.id===c.id);
+              clients[idx] = c;
+            } else {
+              clients.push(c);
+            }
+          });
+        }
+        saveClients();
+        render();
+        alert('Import terminé : ' + imported.length + ' fiche(s) traitée(s).');
+      }catch(err){
+        alert("Erreur : le fichier n'est pas un export JSON valide du CRM JOVERIA.");
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------- Init ----------
+  initAutoCatalogue();
+  renderSyncBar();
+  render();
+})();
+</script>
+
+<script>
+  // Enregistrement du service worker : permet l'installation en app (bureau Mac / écran d'accueil iPhone)
+  // et un fonctionnement hors-ligne basique. Sans effet si le navigateur ne le supporte pas.
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
+
+</body>
+</html>
