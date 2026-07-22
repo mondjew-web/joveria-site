@@ -1171,6 +1171,18 @@ btnNext.addEventListener('click', function(){
             pdf_base64: pdfBase64
           })
         }).catch(function(e){ console.error('Worker error', e); });
+        fetch('https://joveria-airtable-bridge.joveria-john.workers.dev', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                  nom: lead.nom || '',
+                  entreprise: lead.entreprise || '',
+                  email: lead.email || '',
+                  telephone: lead.tel || '',
+                  temps_recupere: r.totalHoursLow + ' a ' + r.totalHoursHigh + ' heures/an',
+                  equivalent_financier: r.totalLow + ' a ' + r.totalHigh + ' euros/an'
+            })
+        }).catch(function(e) { console.error('Airtable bridge error', e); });
       })();
       setTimeout(function(){
         var restartBtn = document.getElementById('btn-restart');
