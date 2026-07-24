@@ -438,6 +438,16 @@
           <label>Prochaine relance</label>
           <input type="date" id="f_relance">
         </div>
+        <div class="field">
+          <label>Date d'envoi du devis</label>
+          <input type="date" id="f_dateEnvoiDevis">
+          <div class="hint">Remplie automatiquement au passage à « Devis envoyé ».</div>
+        </div>
+      </div>
+
+      <div class="field full" style="flex-direction:row;align-items:center;gap:10px;margin-bottom:14px;">
+        <input type="checkbox" id="f_relanceAutoDesactivee" style="width:auto;">
+        <label style="font-size:12.5px;color:var(--text-2);text-transform:none;letter-spacing:normal;">Désactiver la relance automatique pour ce client</label>
       </div>
 
       <div class="field full">
@@ -572,6 +582,9 @@
     if(c.airtableId === undefined) c.airtableId = null;
     if(!Array.isArray(c.notes)) c.notes = [];
     if(!Array.isArray(c.automatisations)) c.automatisations = [];
+    if(!c.dateEnvoiDevis) c.dateEnvoiDevis = '';
+    if(!c.statutRelance) c.statutRelance = 'Aucune';
+    if(c.relanceAutoDesactivee === undefined) c.relanceAutoDesactivee = false;
     return c;
   }
 
@@ -647,9 +660,12 @@
       'Source': c.source || 'Site vitrine',
       'Valeur estimée': Number(c.valeurEstimee) || 0,
       'Automatisations': (c.automatisations && c.automatisations.length) ? c.automatisations : [],
-      'Notes': notesToText(c.notes)
+      'Notes': notesToText(c.notes),
+      'Statut relance': c.statutRelance || 'Aucune',
+      'Relance auto désactivée': !!c.relanceAutoDesactivee
     };
     if(c.prochaineRelance) fields['Prochaine relance'] = c.prochaineRelance;
+    if(c.dateEnvoiDevis) fields['Date envoi devis'] = c.dateEnvoiDevis;
     return fields;
   }
 
@@ -674,6 +690,9 @@
     base.source = f['Source'] || base.source || 'Site vitrine';
     base.valeurEstimee = Number(f['Valeur estimée']) || base.valeurEstimee || 0;
     base.prochaineRelance = f['Prochaine relance'] || base.prochaineRelance || '';
+    base.dateEnvoiDevis = f['Date envoi devis'] || base.dateEnvoiDevis || '';
+    base.statutRelance = f['Statut relance'] || base.statutRelance || 'Aucune';
+    base.relanceAutoDesactivee = (f['Relance auto désactivée'] !== undefined) ? !!f['Relance auto désactivée'] : (base.relanceAutoDesactivee || false);
     base.automatisations = Array.isArray(f['Automatisations']) ? f['Automatisations'] : (base.automatisations||[]);
     // Si c'est une toute nouvelle fiche importée depuis Airtable, on transforme le texte "Notes" en une note initiale.
     if(!existing && f['Notes']){
@@ -1052,6 +1071,8 @@
     document.getElementById('f_source').value = client?.source || 'Site vitrine';
     document.getElementById('f_valeur').value = client?.valeurEstimee || '';
     document.getElementById('f_relance').value = client?.prochaineRelance || '';
+    document.getElementById('f_dateEnvoiDevis').value = client?.dateEnvoiDevis || '';
+    document.getElementById('f_relanceAutoDesactivee').checked = !!client?.relanceAutoDesactivee;
 
     draftAutomatisations = client ? [...(client.automatisations||[])] : [];
     draftNotes = client ? [...(client.notes||[])] : [];
@@ -1144,6 +1165,26 @@
     e.preventDefault();
     const pipeline = document.getElementById('f_pipeline').value;
     const existing = currentEditId ? clients.find(c=>c.id===currentEditId) : null;
+    const etape = document.getElementById('f_etape').value;
+
+    let dateEnvoiDevis = document.getElementById('f_dateEnvoiDevis').value;
+    let prochaineRelance = document.getElementById('f_relance').value;
+    let statutRelance = existing ? (existing.statutRelance || 'Aucune') : 'Aucune';
+    const relanceAutoDesactivee = document.getElementById('f_relanceAutoDesactivee').checked;
+
+    // Auto-remplissage au moment où la fiche passe (ou repasse) à "Devis envoyé" :
+    // date d'envoi + prochaine relance à J+3 si elles ne sont pas déjà renseignées,
+    // et réinitialisation du statut de relance pour repartir sur un cycle propre.
+    const wasAlreadyDevisEnvoye = existing && existing.etape === 'Devis envoyé';
+    if(etape === 'Devis envoyé' && !wasAlreadyDevisEnvoye){
+      if(!dateEnvoiDevis) dateEnvoiDevis = todayISO();
+      if(!prochaineRelance){
+        const d = new Date(); d.setDate(d.getDate()+3);
+        prochaineRelance = d.toISOString().slice(0,10);
+      }
+      statutRelance = 'Aucune';
+    }
+
     const data = {
       id: currentEditId || uid(),
       airtableId: existing ? existing.airtableId : null,
@@ -1156,10 +1197,13 @@
       ville: document.getElementById('f_ville').value.trim(),
       telephone: document.getElementById('f_telephone').value.trim(),
       email: document.getElementById('f_email').value.trim(),
-      etape: document.getElementById('f_etape').value,
+      etape: etape,
       source: document.getElementById('f_source').value,
       valeurEstimee: Number(document.getElementById('f_valeur').value) || 0,
-      prochaineRelance: document.getElementById('f_relance').value,
+      prochaineRelance: prochaineRelance,
+      dateEnvoiDevis: dateEnvoiDevis,
+      statutRelance: statutRelance,
+      relanceAutoDesactivee: relanceAutoDesactivee,
       automatisations: draftAutomatisations,
       notes: draftNotes
     };
